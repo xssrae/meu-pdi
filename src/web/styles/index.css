@@ -1,0 +1,212 @@
+@import 'tailwindcss';
+@import './tokens.css';
+
+/* Ponte cores → Tailwind v4 (ADR-005): componentes usam só estas classes, nunca hex. */
+@theme inline {
+  --color-transparent: transparent;
+  --color-current: currentColor;
+
+  --color-ground: var(--bg-ground);
+  --color-shell: var(--bg-shell);
+  --color-panel: var(--bg-panel);
+  --color-card: var(--bg-card);
+  --color-muted: var(--bg-muted);
+  --color-soft: var(--bg-soft);
+  --color-track: var(--bg-track);
+  --color-line: var(--border);
+  --color-line-strong: var(--border-strong);
+  --color-line-subtle: var(--border-subtle);
+  --color-divider: var(--divider);
+  --color-ink: var(--text-1);
+  --color-ink-2: var(--text-2);
+  --color-ink-3: var(--text-3);
+  --color-ink-hover: var(--ink-hover);
+  --color-on-ink: var(--text-on-ink);
+  --color-on-ink-2: var(--text-on-ink-2);
+  --color-disabled: var(--disabled-bg);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-alert: var(--alert);
+  --color-toast-ok: var(--toast-ok-border);
+
+  --color-status-todo-bg: var(--status-todo-bg);
+  --color-status-todo-fg: var(--status-todo-fg);
+  --color-status-doing-bg: var(--status-doing-bg);
+  --color-status-doing-fg: var(--status-doing-fg);
+  --color-status-review-bg: var(--status-review-bg);
+  --color-status-review-fg: var(--status-review-fg);
+  --color-status-done-bg: var(--status-done-bg);
+  --color-status-done-fg: var(--status-done-fg);
+  --color-chart-todo: var(--chart-todo);
+  --color-chart-doing: var(--chart-doing);
+  --color-chart-review: var(--chart-review);
+  --color-chart-done: var(--chart-done);
+
+  --color-meta-ritmo-bg: var(--meta-ritmo-bg);
+  --color-meta-ritmo-fg: var(--meta-ritmo-fg);
+  --color-meta-ritmo-dot: var(--meta-ritmo-dot);
+  --color-meta-risco-bg: var(--meta-risco-bg);
+  --color-meta-risco-fg: var(--meta-risco-fg);
+  --color-meta-risco-dot: var(--meta-risco-dot);
+  --color-meta-atrasada-bg: var(--meta-atrasada-bg);
+  --color-meta-atrasada-fg: var(--meta-atrasada-fg);
+  --color-meta-atrasada-dot: var(--meta-atrasada-dot);
+  --color-meta-concluida-bg: var(--meta-concluida-bg);
+  --color-meta-concluida-fg: var(--meta-concluida-fg);
+  --color-meta-concluida-dot: var(--meta-concluida-dot);
+
+  --color-prio-alta-bg: var(--prio-alta-bg);
+  --color-prio-alta-fg: var(--prio-alta-fg);
+  --color-prio-alta-dot: var(--prio-alta-dot);
+  --color-prio-media-bg: var(--prio-media-bg);
+  --color-prio-media-fg: var(--prio-media-fg);
+  --color-prio-media-dot: var(--prio-media-dot);
+  --color-prio-baixa-bg: var(--prio-baixa-bg);
+  --color-prio-baixa-fg: var(--prio-baixa-fg);
+  --color-prio-baixa-dot: var(--prio-baixa-dot);
+
+  --color-comp-nao-iniciada-bg: var(--comp-nao-iniciada-bg);
+  --color-comp-nao-iniciada-fg: var(--comp-nao-iniciada-fg);
+  --color-comp-nao-iniciada-dot: var(--comp-nao-iniciada-dot);
+  --color-comp-em-evolucao-bg: var(--comp-em-evolucao-bg);
+  --color-comp-em-evolucao-fg: var(--comp-em-evolucao-fg);
+  --color-comp-em-evolucao-dot: var(--comp-em-evolucao-dot);
+  --color-comp-na-meta-bg: var(--comp-na-meta-bg);
+  --color-comp-na-meta-fg: var(--comp-na-meta-fg);
+  --color-comp-na-meta-dot: var(--comp-na-meta-dot);
+
+  --color-trilha-1-bg: var(--trilha-1-bg);
+  --color-trilha-1-tab: var(--trilha-1-tab);
+  --color-trilha-1-fg: var(--trilha-1-fg);
+  --color-trilha-2-bg: var(--trilha-2-bg);
+  --color-trilha-2-tab: var(--trilha-2-tab);
+  --color-trilha-2-fg: var(--trilha-2-fg);
+  --color-trilha-3-bg: var(--trilha-3-bg);
+  --color-trilha-3-tab: var(--trilha-3-tab);
+  --color-trilha-3-fg: var(--trilha-3-fg);
+  --color-trilha-4-bg: var(--trilha-4-bg);
+  --color-trilha-4-tab: var(--trilha-4-tab);
+  --color-trilha-4-fg: var(--trilha-4-fg);
+  --color-trilha-5-bg: var(--trilha-5-bg);
+  --color-trilha-5-tab: var(--trilha-5-tab);
+  --color-trilha-5-fg: var(--trilha-5-fg);
+
+  --color-pasta-1-bg: var(--pasta-1-bg);
+  --color-pasta-1-tab: var(--pasta-1-tab);
+  --color-pasta-2-bg: var(--pasta-2-bg);
+  --color-pasta-2-tab: var(--pasta-2-tab);
+  --color-pasta-3-bg: var(--pasta-3-bg);
+  --color-pasta-3-tab: var(--pasta-3-tab);
+  --color-pasta-4-bg: var(--pasta-4-bg);
+  --color-pasta-4-tab: var(--pasta-4-tab);
+
+  --color-pilar-comp: var(--pilar-comp);
+  --color-pilar-ferr: var(--pilar-ferr);
+  --color-pilar-tec: var(--pilar-tec);
+
+  --color-fb-reconhecimento-bg: var(--fb-reconhecimento-bg);
+  --color-fb-reconhecimento-fg: var(--fb-reconhecimento-fg);
+  --color-fb-reconhecimento-dot: var(--fb-reconhecimento-dot);
+  --color-fb-melhoria-bg: var(--fb-melhoria-bg);
+  --color-fb-melhoria-fg: var(--fb-melhoria-fg);
+  --color-fb-melhoria-dot: var(--fb-melhoria-dot);
+  --color-fb-insight-bg: var(--fb-insight-bg);
+  --color-fb-insight-fg: var(--fb-insight-fg);
+  --color-fb-insight-dot: var(--fb-insight-dot);
+}
+
+/* Hover só onde há ponteiro fino (CodingPreferences). */
+@custom-variant hover {
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      @slot;
+    }
+  }
+}
+
+/* Escala tipográfica do artboard. */
+@utility type-display {
+  font-size: 40px;
+  line-height: 1.15;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+@utility type-h1 {
+  font-size: 28px;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+@utility type-h2 {
+  font-size: 18px;
+  line-height: 1.35;
+  font-weight: 600;
+}
+@utility type-title {
+  font-size: 15px;
+  line-height: 1.4;
+  font-weight: 600;
+}
+@utility type-body {
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 400;
+}
+@utility type-small {
+  font-size: 13px;
+  line-height: 1.45;
+  font-weight: 400;
+}
+@utility type-caption {
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 400;
+}
+@utility type-micro {
+  font-size: 11px;
+  line-height: 1.35;
+  font-weight: 500;
+}
+@utility type-mono {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 500;
+}
+@utility type-kpi {
+  font-size: 28px;
+  line-height: 1.1;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+/* Anel de seleção (elevação "ring"). */
+@utility ring-select {
+  box-shadow: 0 0 0 2px var(--text-1);
+}
+
+@layer base {
+  html {
+    background: var(--bg-ground);
+    color: var(--text-1);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  :focus-visible {
+    outline: 2px solid var(--text-1);
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+    }
+  }
+}

@@ -1,0 +1,159 @@
+/*
+ * Tokens do design system v0.2 (artboard "Fundamentos", Artifact "Meu PDI — Dashboard").
+ * Nomes iguais aos do artboard. O artboard é normativo; tokens marcados com
+ * "(código)" não estão nele e vieram da auditoria das telas (Architecture §6.1).
+ * Tema claro em :root; o escuro entra como [data-theme="dark"] quando for desenhado.
+ */
+/* Escalas sem paleta padrão do Tailwind: só existem as do design system. */
+@theme {
+  --color-*: initial;
+  --radius-*: initial;
+  --shadow-*: initial;
+  --font-*: initial;
+  --text-*: initial;
+}
+
+/* Raio, elevação e fontes: viram utilitários (rounded-*, shadow-*, font-*) e variáveis em :root. */
+@theme static {
+  /* Raio */
+  --radius-2xs: 4px; /* (código) */
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+
+  /* Elevação */
+  --shadow-1: 0 1px 2px rgb(23 23 20 / 0.04);
+  --shadow-tab: 0 1px 2px rgb(23 23 20 / 0.08); /* (código) aba e item ativos */
+  --shadow-2: 0 6px 20px rgb(23 23 20 / 0.08);
+
+  /* Tipografia */
+  --font-sans: 'Geist', system-ui, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, monospace;
+  --radius-full: 9999px;
+}
+
+:root {
+  /* Superfícies e texto */
+  --bg-ground: #e9e7e1;
+  --bg-shell: #f4f3ef;
+  --bg-panel: #fbfaf8;
+  --bg-card: #ffffff;
+  --bg-muted: #f6f5f1; /* (código) fundo de citação e item suave */
+  --bg-soft: #f1f0ec; /* botão suave */
+  --bg-track: #efeee9; /* trilho de abas e barras */
+  --border: #e6e4de;
+  --border-strong: #dedbd3;
+  --border-subtle: #e3e0d9; /* (código) divisórias do shell */
+  --divider: #eeece7; /* (código) linhas de lista e tabela */
+  --text-1: #1a1a17;
+  --text-2: #4a4842;
+  --text-3: #6b6962;
+  --text-on-ink: #ffffff;
+  --text-on-ink-2: #cfccc4; /* (código) secundário sobre tinta */
+  --ink-hover: #33332f;
+  --disabled-bg: #dedbd3;
+
+  /* Acento e alerta */
+  --accent: #2f6b4f;
+  --accent-strong: #1f4a36;
+  --alert: #c2321f;
+
+  /* Status de ação: par da pílula + série de gráfico */
+  --status-todo-bg: #e3ecfa;
+  --status-todo-fg: #234e92;
+  --status-doing-bg: #fce7d2;
+  --status-doing-fg: #8f420a;
+  --status-review-bg: #ece6fb;
+  --status-review-fg: #5b3fb0;
+  --status-done-bg: #dcefe2;
+  --status-done-fg: #1d6339;
+  --chart-todo: #4f83d6;
+  --chart-doing: #d9762b;
+  --chart-review: #7458d0;
+  --chart-done: #2e8b5e;
+
+  /* Estado de meta */
+  --meta-ritmo-bg: #dcefe2;
+  --meta-ritmo-fg: #1d6339;
+  --meta-ritmo-dot: #2e8b5e;
+  --meta-risco-bg: #fcefd0;
+  --meta-risco-fg: #8a5a00;
+  --meta-risco-dot: #c98a00;
+  --meta-atrasada-bg: #fce4e1;
+  --meta-atrasada-fg: #ae2a1f;
+  --meta-atrasada-dot: #c2321f;
+  --meta-concluida-bg: #f1f0ec;
+  --meta-concluida-fg: #45433d;
+  --meta-concluida-dot: #8a877f; /* (código) só ponto, nunca texto */
+
+  /* Prioridade */
+  --prio-alta-bg: #fce4e1;
+  --prio-alta-fg: #ae2a1f;
+  --prio-alta-dot: #c2321f;
+  --prio-media-bg: #eee8fb;
+  --prio-media-fg: #5b3fb0;
+  --prio-media-dot: #7458d0;
+  --prio-baixa-bg: #e0f0e6;
+  --prio-baixa-fg: #1d6339;
+  --prio-baixa-dot: #2e8b5e;
+
+  /* Status de competência (tela Competências) */
+  --comp-nao-iniciada-bg: #f1f0ec;
+  --comp-nao-iniciada-fg: #45433d;
+  --comp-nao-iniciada-dot: #8a877f;
+  --comp-em-evolucao-bg: #fce7d2;
+  --comp-em-evolucao-fg: #8f420a;
+  --comp-em-evolucao-dot: #d9762b;
+  --comp-na-meta-bg: #dcefe2;
+  --comp-na-meta-fg: #1d6339;
+  --comp-na-meta-dot: #2e8b5e;
+
+  /* Trilhas: tom 1 (corpo), tom 2 (aba) e texto */
+  --trilha-1-bg: #ece8fa;
+  --trilha-1-tab: #dcd4f5;
+  --trilha-1-fg: #4c3a9e;
+  --trilha-2-bg: #fcebdd;
+  --trilha-2-tab: #f7d9c1;
+  --trilha-2-fg: #8a3f0f;
+  --trilha-3-bg: #e1edf9;
+  --trilha-3-tab: #caddf3;
+  --trilha-3-fg: #1f4e79;
+  --trilha-4-bg: #e0f1e7;
+  --trilha-4-tab: #c8e6d3;
+  --trilha-4-fg: #1d5e3a;
+  --trilha-5-bg: #fae3e9;
+  --trilha-5-tab: #f3cbd6;
+  --trilha-5-fg: #8c2343;
+
+  /* Pastas de Projetos (código): não reutilizam cores de trilha */
+  --pasta-1-bg: #e9e6f7;
+  --pasta-1-tab: #dad4f2;
+  --pasta-2-bg: #dfebf7;
+  --pasta-2-tab: #cbddf0;
+  --pasta-3-bg: #fbe7d7;
+  --pasta-3-tab: #f5d6bd;
+  --pasta-4-bg: #e3f0e7;
+  --pasta-4-tab: #cde5d5;
+
+  /* Pilar */
+  --pilar-comp: #e07a2e;
+  --pilar-ferr: #7c5cd6;
+  --pilar-tec: #1e3a8a;
+
+  /* Feedback */
+  --fb-reconhecimento-bg: #dcefe2;
+  --fb-reconhecimento-fg: #1d6339;
+  --fb-reconhecimento-dot: #2e8b5e;
+  --fb-melhoria-bg: #fce7d2;
+  --fb-melhoria-fg: #8f420a;
+  --fb-melhoria-dot: #d9762b;
+  --fb-insight-bg: #e1edf9;
+  --fb-insight-fg: #1f4e79;
+  --fb-insight-dot: #4f83d6;
+
+  /* Toast de sucesso */
+  --toast-ok-border: #cfe6d7;
+}
