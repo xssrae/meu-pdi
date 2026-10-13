@@ -65,3 +65,11 @@ export function plural(n: number, singular: string, pluralForma = `${singular}s`
 }
 
 const MESES_EXTENSO = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro']
+
+/** Texto de várias linhas → lista (uma entrada por linha, sem vazias). */
+export function linhasParaLista(texto: string): string[] {
+  return texto
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter(Boolean)
+}

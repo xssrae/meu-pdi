@@ -1,18 +1,19 @@
 // Reuniões 1:1 (F15, F16): agenda semanal com 1:1s, prazos, blocos de estudo
 // e "preparar pauta"; minicalendário do mês; pauta e metas da próxima 1:1;
-// histórico das 1:1s realizadas. Só leitura: a pauta ainda não é marcada aqui.
+// histórico das 1:1s realizadas. Registrar, editar (pauta inclusive) e
+// excluir 1:1s grava no banco (ADR-007).
 
-import { CalendarDays, Check, ChevronLeft, ChevronRight } from 'lucide-react'
-import { useMemo } from 'react'
+import { CalendarDays, Check, ChevronLeft, ChevronRight, Pencil, Plus } from 'lucide-react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router'
 import type { Evento } from '../../../domain/aggregates'
 import { dataValida, diaDaSemana, gradeDoMes, inicioDaSemana, mesDe, somarDias } from '../../../domain/datas'
 import { hojeISO } from '../../../domain/metrics'
-import type { CorTrilha } from '../../../domain/types'
+import type { CorTrilha, Reuniao } from '../../../domain/types'
 import { useAgenda, useFeedbacks, useMetas, useResumo, useReunioes, useTrilhas } from '../../api/queries'
 import { Button, ButtonLink, IconButton } from '../../components/Button'
 import { cn } from '../../components/cn'
-import { AvisoArquivos, EstadoConsulta } from '../../components/EstadoConsulta'
+import { EstadoConsulta } from '../../components/EstadoConsulta'
 import { Secao } from '../../components/Secao'
 import { StatusPill } from '../../components/StatusPill'
 import { classesEvento } from '../../components/tones'
@@ -20,6 +21,7 @@ import { dataCurta, mesEDia, nomeDoMes, plural } from '../../format'
 import { Painel } from '../../layout/AppShell'
 import { PageHeader, TituloTela } from '../../layout/PageHeader'
 import { useParametros } from '../../useParametros'
+import { DialogoReuniao } from '../edicao/formularios'
 import { CardProximaReuniao } from './CardProximaReuniao'
 
 const DIAS_UTEIS = ['seg', 'ter', 'qua', 'qui', 'sex']
@@ -55,12 +57,14 @@ export function Reunioes() {
   const feedbacks = useFeedbacks()
   const metas = useMetas()
   const trilhas = useTrilhas()
+  const [edicao, setEdicao] = useState<Reuniao | 'nova' | null>(null)
 
   const corDe = useMemo(() => new Map((trilhas.data?.itens ?? []).map((t) => [t.id, t.cor])), [trilhas.data])
   const irPara = (s: string) => alterar({ semana: s === padrao ? null : s })
 
   const historico = (reunioes.data?.itens ?? []).filter((r) => r.status === 'realizada')
   const proxima = resumo.data?.proximaReuniao
+  const reuniaoProxima = proxima && reunioes.data?.itens.find((r) => r.data === proxima.data)
 
   return (
     <>
@@ -68,7 +72,11 @@ export function Reunioes() {
         <ButtonLink to={`/planejamentos?mes=${mes}`} icone={<CalendarDays aria-hidden="true" className="size-4" />}>
           Ver no calendário de metas
         </ButtonLink>
+        <Button variante="primario" icone={<Plus aria-hidden="true" className="size-4" />} onClick={() => setEdicao('nova')}>
+          Nova 1:1
+        </Button>
       </PageHeader>
+      <DialogoReuniao aberto={edicao !== null} onFechar={() => setEdicao(null)} reuniao={edicao === 'nova' ? undefined : (edicao ?? undefined)} />
       <Painel>
         <TituloTela
           titulo="Reuniões 1:1"
@@ -76,7 +84,6 @@ export function Reunioes() {
         />
 
         <EstadoConsulta carregando={reunioes.isPending || semana.isPending} erro={reunioes.error ?? semana.error} />
-        {reunioes.data && <AvisoArquivos erros={reunioes.data.erros} />}
 
         <div className="flex flex-wrap items-start gap-4">
           <aside aria-label="Calendário e histórico" className="flex min-w-0 flex-[1_1_240px] flex-col gap-4">
@@ -96,8 +103,8 @@ export function Reunioes() {
                     const nFb = (feedbacks.data?.itens ?? []).filter((f) => f.reuniao === r.data).length
                     const nMetas = (metas.data?.itens ?? []).filter((x) => x.reuniao === r.data).length
                     return (
-                      <li key={r.data}>
-                        <Link to={`/feedbacks?reuniao=${r.data}`} className="flex items-center gap-3 border-t border-divider py-2.5 text-ink no-underline hover:bg-muted">
+                      <li key={r.data} className="flex items-center gap-1 border-t border-divider">
+                        <Link to={`/feedbacks?reuniao=${r.data}`} className="flex min-w-0 flex-1 items-center gap-3 py-2.5 text-ink no-underline hover:bg-muted">
                           <span aria-hidden="true" className="flex h-11 w-10 shrink-0 flex-col items-center justify-center rounded-md bg-soft">
                             <span className="text-[10px] text-ink-3 uppercase">{m}</span>
                             <span className="text-[16px] leading-none font-semibold">{dia.padStart(2, '0')}</span>
@@ -111,6 +118,15 @@ export function Reunioes() {
                           </span>
                           <ChevronRight aria-hidden="true" className="size-4 shrink-0 text-ink-3" />
                         </Link>
+                        <button
+                          type="button"
+                          onClick={() => setEdicao(r)}
+                          aria-label={`Editar a 1:1 de ${dataCurta(r.data)}`}
+                          title="Editar"
+                          className="inline-flex size-8 pointer-coarse:size-11 shrink-0 items-center justify-center rounded-sm text-ink-3 hover:bg-muted hover:text-ink"
+                        >
+                          <Pencil aria-hidden="true" className="size-3.5" />
+                        </button>
                       </li>
                     )
                   })}
@@ -169,14 +185,19 @@ export function Reunioes() {
                       ))}
                     </ul>
                   ) : (
-                    <p className="m-0 type-small text-on-ink-2">Sem pauta. Escreva a checklist na seção “## Pauta” da nota da 1:1.</p>
+                    <p className="m-0 type-small text-on-ink-2">Sem pauta ainda.</p>
                   )}
                 </div>
+                {reuniaoProxima && (
+                  <Button variante="suave" className="self-start" icone={<Pencil aria-hidden="true" className="size-3.5" />} onClick={() => setEdicao(reuniaoProxima)}>
+                    Editar 1:1 e pauta
+                  </Button>
+                )}
               </CardProximaReuniao>
             ) : (
               resumo.data && (
                 <Secao titulo="Próxima 1:1">
-                  <p className="m-0 type-small text-ink-3">Nenhuma 1:1 agendada. Crie uma nota em Reunioes/ com status agendada.</p>
+                  <p className="m-0 type-small text-ink-3">Nenhuma 1:1 agendada. Use “Nova 1:1” para marcar a próxima.</p>
                 </Secao>
               )
             )}

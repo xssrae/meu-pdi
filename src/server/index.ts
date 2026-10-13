@@ -3,18 +3,19 @@
 
 import { serve } from '@hono/node-server'
 import { serveStatic } from '@hono/node-server/serve-static'
-import { existsSync } from 'node:fs'
 import { Hono } from 'hono'
 import { comTratamentoDeErros, criarApi } from './app'
 import { carregarConfig } from './config'
-import { VaultRepository } from './vault-repository'
+import { abrirBanco } from './db/conexao'
+import { bancoVazio, carregarSemente, lerSemente } from './db/semente'
+import { Servicos } from './servicos'
 
 const config = carregarConfig()
-if (!existsSync(config.pdiDir)) {
-  console.warn(`Aviso: a pasta do PDI não existe ainda: ${config.pdiDir}`)
-}
+const db = abrirBanco(config.db)
+if (config.semente && bancoVazio(db)) carregarSemente(db, lerSemente(config.semente))
 
-const repo = new VaultRepository(config.pdiDir)
+const hoje = config.hojeFixo ? () => config.hojeFixo! : undefined
+const servicos = new Servicos(db, { hoje, pastaBackups: config.pastaBackups })
 const app = new Hono()
 
 app.use(async (c, next) => {
@@ -29,10 +30,10 @@ app.use(async (c, next) => {
 app.route(
   '/',
   criarApi({
-    repo,
+    servicos,
     hostsPermitidos: config.hostsPermitidos,
     origensPermitidas: config.origensPermitidas,
-    hoje: config.hojeFixo ? () => config.hojeFixo! : undefined,
+    hoje,
   }),
 )
 
@@ -45,5 +46,13 @@ if (config.producao) {
 comTratamentoDeErros(app)
 
 serve({ fetch: app.fetch, hostname: '127.0.0.1', port: config.porta }, (info) => {
-  console.log(`meu-pdi ouvindo em http://127.0.0.1:${info.port} · PDI em ${config.pdiDir}`)
+  console.log(`meu-pdi ouvindo em http://127.0.0.1:${info.port} · banco em ${config.db}`)
 })
+
+// Fecha o banco ao sair: o WAL é incorporado e o arquivo fica consistente.
+for (const sinal of ['SIGINT', 'SIGTERM'] as const) {
+  process.once(sinal, () => {
+    db.close()
+    process.exit(0)
+  })
+}

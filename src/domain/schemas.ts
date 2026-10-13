@@ -1,6 +1,5 @@
-// Schemas Zod do frontmatter das notas do PDI e dos parâmetros da API.
-// Os schemas validam o formato no vault (snake_case) e o servidor converte
-// para os tipos do domínio (camelCase) em `server/vault-repository.ts`.
+// Schemas Zod das escritas (API HTTP e MCP compartilham os mesmos, via
+// `server/servicos.ts`) e dos parâmetros de consulta da API.
 
 import { z } from 'zod'
 import { isCompetenciaId } from './framework'
@@ -25,14 +24,9 @@ export const RE_TRILHA_ID = /^T\d+$/
 
 export const data = z.string().regex(RE_DATA, 'data deve estar no formato AAAA-MM-DD')
 export const hora = z.string().regex(RE_HORA, 'horário deve estar no formato HH:MM')
-/** YAML lê `2026.2` como número; o ID do ciclo é sempre texto. */
-const texto = z.union([z.string(), z.number()]).transform(String)
-const opcional = <T extends z.ZodType>(s: T) => s.nullish().transform((v) => v ?? null)
-const lista = <T extends z.ZodType>(s: T) => z.array(s).nullish().transform((v) => v ?? [])
 
 export const competenciaId = z.string().refine(isCompetenciaId, { error: (i) => `competência desconhecida: ${String(i.input)}` })
 const trilhaId = z.string().regex(RE_TRILHA_ID, 'trilha deve ser T1, T2…')
-const tipo = (t: string) => z.literal(t).optional()
 
 /** Remove `[[` `]]` e alias de um wikilink: `"[[nota|alias]]"` → `"nota"`. */
 export function alvoWikilink(valor: string): string {
@@ -46,28 +40,31 @@ const maturidade = z
   .max(4)
   .transform((n) => n as Maturidade)
 
-const autoavaliacao = z.union([
-  maturidade.transform((nivel) => ({ nivel, status: null })),
-  z.object({ nivel: maturidade, status: opcional(z.enum(STATUS_COMPETENCIA)) }),
-])
+const textoObrigatorio = (campo: string) => z.string().trim().min(1, `${campo} é obrigatório`)
+const item = z.strictObject({ texto: textoObrigatorio('texto'), feito: z.boolean().default(false) })
+const wikilink = z.string().trim().min(1).transform(alvoWikilink)
 
-export const cicloFm = z.object({
-  type: tipo('pdi-ciclo'),
-  id: texto,
-  inicio: data,
-  fim: data,
-  nivel_atual: z.enum(NIVEIS),
-  nivel_alvo: z.enum(NIVEIS),
-  autoavaliacao: z
-    .record(competenciaId, autoavaliacao)
-    .nullish()
-    .transform((v) => v ?? {}),
-})
+// ---------- Entrada das escritas (API e MCP) ----------
+// Cada schema descreve a entidade inteira, sem `id` gerado e sem `versao`.
+// Criar usa os padrões; atualizar mescla o patch na entidade atual e valida
+// o resultado com o mesmo schema. Campos desconhecidos são recusados.
 
-export const trilhaFm = z.object({
-  type: tipo('pdi-trilha'),
-  id: trilhaId,
-  nome: z.string().min(1),
+export const cicloEntrada = z
+  .strictObject({
+    id: textoObrigatorio('id'),
+    inicio: data,
+    fim: data,
+    nivelAtual: z.enum(NIVEIS),
+    nivelAlvo: z.enum(NIVEIS),
+    autoavaliacao: z
+      .record(competenciaId, z.strictObject({ nivel: maturidade, status: z.enum(STATUS_COMPETENCIA).nullable().default(null) }))
+      .default({}),
+  })
+  .refine((c) => c.inicio <= c.fim, { message: 'o início do ciclo deve ser anterior ao fim', path: ['fim'] })
+
+export const trilhaEntrada = z.strictObject({
+  nome: textoObrigatorio('nome'),
+  descricao: z.string().trim().default(''),
   cor: z
     .number()
     .int()
@@ -75,70 +72,73 @@ export const trilhaFm = z.object({
     .max(CORES_TRILHA.length)
     .transform((n) => n as CorTrilha),
   ordem: z.number().int().optional(),
-  competencias: lista(competenciaId),
+  competencias: z.array(competenciaId).default([]),
 })
 
-export const acaoFm = z.object({
-  type: tipo('pdi-acao'),
-  id: z.string().regex(RE_ACAO_ID, 'ID da ação deve ser PDI-NN'),
-  ciclo: texto,
+export const acaoEntrada = z.strictObject({
+  titulo: textoObrigatorio('título'),
+  ciclo: textoObrigatorio('ciclo'),
   trilha: trilhaId,
-  competencia: competenciaId,
-  status: z.enum(STATUS_ACAO),
+  competenciaId,
+  status: z.enum(STATUS_ACAO).default('nao-iniciado'),
   prioridade: z.enum(PRIORIDADES).default('media'),
-  prazo: opcional(data),
+  prazo: data.nullable().default(null),
+  marcos: z.array(item).default([]),
+  evidencias: z.array(wikilink).default([]),
 })
 
-export const metaFm = z.object({
-  type: tipo('pdi-meta'),
-  id: z.string().regex(RE_META_ID, 'ID da meta deve ser M-NN'),
+export const metaEntrada = z.strictObject({
+  titulo: textoObrigatorio('título'),
   trilha: trilhaId,
   reuniao: data,
-  feedback: opcional(z.string().regex(RE_FEEDBACK_ID)),
-  criada: data,
+  feedback: z.string().regex(RE_FEEDBACK_ID, 'feedback deve ser FB-NN').nullable().default(null),
+  criada: data.optional(),
   prazo: data,
-  acoes: lista(z.string().regex(RE_ACAO_ID)),
-  progresso_manual: opcional(z.number().min(0).max(100)),
-  concluida_em: opcional(data),
+  acoes: z.array(z.string().regex(RE_ACAO_ID, 'ação deve ser PDI-NN')).default([]),
+  progressoManual: z.number().min(0).max(100).nullable().default(null),
+  concluidaEm: data.nullable().default(null),
 })
 
-export const reuniaoFm = z.object({
-  type: tipo('pdi-reuniao'),
-  data,
-  inicio: hora,
-  fim: hora,
-  tema: opcional(z.string()),
-  status: z.enum(STATUS_REUNIAO).default('agendada'),
-})
+export const reuniaoEntrada = z
+  .strictObject({
+    data,
+    inicio: hora,
+    fim: hora,
+    tema: z.string().trim().nullable().default(null),
+    status: z.enum(STATUS_REUNIAO).default('agendada'),
+    pauta: z.array(item).default([]),
+  })
+  .refine((r) => r.inicio < r.fim, { message: 'o início deve ser antes do fim', path: ['fim'] })
 
-export const feedbackFm = z.object({
-  type: tipo('pdi-feedback'),
-  id: z.string().regex(RE_FEEDBACK_ID, 'ID do feedback deve ser FB-NN'),
+export const feedbackEntrada = z.strictObject({
   reuniao: data,
   tipo: z.enum(TIPOS_FEEDBACK),
-  competencia: competenciaId,
-  meta: opcional(z.string().regex(RE_META_ID)),
+  competenciaId,
+  meta: z.string().regex(RE_META_ID, 'meta deve ser M-NN').nullable().default(null),
+  texto: z.string().trim().default(''),
 })
 
-export const projetoFm = z.object({
-  type: tipo('pdi-projeto'),
-  projeto: z.string().min(1).transform(alvoWikilink),
-  pasta: z.string().min(1),
-  trilhas: lista(trilhaId),
+export const projetoEntrada = z.strictObject({
+  projeto: textoObrigatorio('projeto').transform(alvoWikilink),
+  pasta: textoObrigatorio('pasta'),
+  descricao: z.string().trim().default(''),
+  trilhas: z.array(trilhaId).default([]),
   status: z.enum(STATUS_PROJETO).default('ativo'),
-  imagens: lista(z.string()).pipe(z.array(z.string()).max(6, 'no máximo 6 imagens por projeto')),
+  imagens: z.array(z.string().min(1)).max(6, 'no máximo 6 imagens por projeto').default([]),
+  evidencias: z.array(wikilink).default([]),
 })
 
-export const blocoFm = z.object({
-  type: tipo('pdi-bloco'),
-  titulo: z.string().min(1),
-  dia_semana: z.number().int().min(0).max(6),
-  inicio: hora,
-  fim: hora,
-  de: data,
-  ate: opcional(data),
-  meta: opcional(z.string().regex(RE_META_ID)),
-})
+export const blocoEntrada = z
+  .strictObject({
+    titulo: textoObrigatorio('título'),
+    diaSemana: z.number().int().min(0).max(6),
+    inicio: hora,
+    fim: hora,
+    de: data,
+    ate: data.nullable().default(null),
+    meta: z.string().regex(RE_META_ID, 'meta deve ser M-NN').nullable().default(null),
+  })
+  .refine((b) => b.inicio < b.fim, { message: 'o início deve ser antes do fim', path: ['fim'] })
 
 // ---------- Parâmetros da API ----------
 

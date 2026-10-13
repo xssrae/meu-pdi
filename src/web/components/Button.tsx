@@ -2,7 +2,7 @@ import type { ComponentProps, ReactNode } from 'react'
 import { Link, type LinkProps } from 'react-router'
 import { cn } from './cn'
 
-export type VarianteBotao = 'primario' | 'secundario' | 'suave'
+export type VarianteBotao = 'primario' | 'secundario' | 'suave' | 'perigo'
 
 // Altura 40 px; 44 px em toque. Um primário por tela, no topo à direita.
 const BASE =
@@ -12,6 +12,8 @@ const VARIANTE: Record<VarianteBotao, string> = {
   primario: 'px-4 bg-ink text-on-ink hover:bg-ink-hover disabled:bg-disabled disabled:text-ink-3',
   secundario: 'px-3.5 bg-card text-ink border border-line-strong hover:bg-muted disabled:text-ink-3',
   suave: 'px-3 bg-soft text-ink type-small font-medium hover:bg-track disabled:text-ink-3',
+  /** Só para confirmar uma exclusão definitiva. */
+  perigo: 'px-4 bg-alert text-on-ink hover:bg-alert/90 disabled:bg-disabled disabled:text-ink-3',
 }
 
 interface Comum {

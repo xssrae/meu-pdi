@@ -1,6 +1,7 @@
 // Hooks do TanStack Query. `refetchOnWindowFocus` (padrão) atualiza o painel
-// ao voltar do Obsidian, sem file watcher. As listas vêm inteiras (dezenas de
-// itens) e os filtros das telas são aplicados no cliente.
+// ao voltar para a janela, inclusive depois de um agente gravar pelo MCP. As
+// listas vêm inteiras (dezenas de itens) e os filtros das telas são aplicados
+// no cliente. As escritas ficam em `mutacoes.ts`.
 
 import { QueryClient, useQuery } from '@tanstack/react-query'
 import type { DataISO } from '../../domain/types'

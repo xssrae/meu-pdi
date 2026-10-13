@@ -1,7 +1,9 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Page } from '@playwright/test'
 
-// Telas da Fase 3 (só leitura) contra o vault de fixture, com hoje = 2026-10-11.
+// Telas contra o banco em memória com a semente do protótipo (`npm run dev:e2e`),
+// com hoje = 2026-10-11. Os testes não gravam: o servidor é compartilhado entre
+// eles. As escritas são cobertas pelos testes da API e dos serviços (Vitest).
 
 async function semRolagemHorizontal(page: Page) {
   const excesso = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
@@ -29,8 +31,8 @@ for (const t of TELAS) {
     test.beforeEach(async ({ page }) => {
       await page.goto(t.rota)
       await expect(page.getByRole('heading', { level: 1, name: t.titulo })).toBeVisible()
-      // Espera as consultas: nenhum "Lendo o vault…" na tela.
-      await expect(page.getByText('Lendo o vault…')).toHaveCount(0)
+      // Espera as consultas: nenhum "Carregando…" na tela.
+      await expect(page.getByText('Carregando…')).toHaveCount(0)
       await page.evaluate(() => document.fonts.ready)
     })
 
@@ -45,7 +47,7 @@ for (const t of TELAS) {
   })
 }
 
-test('Visão geral mostra trilhas, próxima 1:1, prazos e feedbacks do vault', async ({ page }) => {
+test('Visão geral mostra trilhas, próxima 1:1, prazos e feedbacks', async ({ page }) => {
   await page.goto('/')
   await expect(page.getByText('Ciclo 2026.2 · jul–dez')).toBeVisible()
   await expect(page.getByText('de 15', { exact: true })).toBeVisible()
@@ -91,9 +93,35 @@ test('Trilhas troca a trilha selecionada pela URL e mostra o quadro', async ({ p
   await expect(page).toHaveURL(/\/trilhas\/T5$/)
   await expect(page.getByRole('heading', { level: 2, name: 'Cloud, Infra e Segurança' })).toBeVisible()
   await expect(page.getByRole('region', { name: /^Concluído:/ })).toContainText('PDI-14')
-  // Só leitura: nenhum botão de mover card nesta fase.
-  await expect(page.getByRole('button', { name: /^Mover PDI-/ })).toHaveCount(0)
+  // Cada card pode ser editado; só os não concluídos avançam.
+  await expect(page.getByRole('button', { name: /^Editar PDI-/ })).toHaveCount(3)
+  await expect(page.getByRole('button', { name: /^Mover PDI-/ })).toHaveCount(2)
 })
+
+const DIALOGOS = [
+  { rota: '/trilhas', botao: 'Nova ação', titulo: 'Nova ação' },
+  { rota: '/trilhas', botao: 'Nova trilha', titulo: 'Nova trilha' },
+  { rota: '/trilhas', botao: 'Editar PDI-01', titulo: 'Editar PDI-01' },
+  { rota: '/planejamentos', botao: 'Nova meta', titulo: 'Nova meta' },
+  { rota: '/reunioes', botao: 'Nova 1:1', titulo: 'Nova 1:1' },
+  { rota: '/feedbacks', botao: 'Transformar FB-06 em meta', titulo: 'Transformar FB-06 em meta' },
+  { rota: '/projetos', botao: 'Novo projeto', titulo: 'Novo projeto' },
+  { rota: '/competencias', botao: 'Editar a autoavaliação de Comunicação', titulo: 'Comunicação' },
+] as const
+
+for (const d of DIALOGOS) {
+  test(`diálogo "${d.titulo}" passa no axe e fecha com Esc sem gravar`, async ({ page }) => {
+    await page.goto(d.rota)
+    await expect(page.getByText('Carregando…')).toHaveCount(0)
+    await page.getByRole('button', { name: d.botao, exact: true }).click()
+    const dialogo = page.getByRole('dialog', { name: d.titulo })
+    await expect(dialogo).toBeVisible()
+    await semViolacoesA11y(page)
+    await semRolagemHorizontal(page)
+    await page.keyboard.press('Escape')
+    await expect(dialogo).toHaveCount(0)
+  })
+}
 
 test('Planejamentos navega pelo calendário e filtra metas por estado', async ({ page }) => {
   await page.goto('/planejamentos')

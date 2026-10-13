@@ -1,15 +1,15 @@
 // Competências (F6, F11, F12): as 18 competências do framework com nível
-// atual (autoavaliação do ciclo), meta, trilhas e status. Só leitura até a
-// Fase 4: os pontos e o status ainda não gravam no vault.
+// atual (autoavaliação do ciclo), meta, trilhas e status. A autoavaliação de
+// cada competência é editada aqui e gravada no ciclo (ADR-007).
 
-import { Search } from 'lucide-react'
-import { useMemo } from 'react'
+import { Pencil, Search } from 'lucide-react'
+import { useMemo, useState } from 'react'
 import { COMPETENCIAS, ESCALA, NOME_NIVEL } from '../../../domain/framework'
 import { lacuna, maturidadeMeta, statusCompetencia } from '../../../domain/metrics'
 import { PILARES, STATUS_COMPETENCIA, type Competencia, type Nivel, type Pilar, type Trilha } from '../../../domain/types'
 import { useCiclo, useTrilhas } from '../../api/queries'
 import { cn } from '../../components/cn'
-import { AvisoArquivos, EstadoConsulta } from '../../components/EstadoConsulta'
+import { EstadoConsulta } from '../../components/EstadoConsulta'
 import { LevelDots } from '../../components/LevelDots'
 import { SegmentedTabs } from '../../components/SegmentedTabs'
 import { StatusPill } from '../../components/StatusPill'
@@ -18,6 +18,7 @@ import { TrilhaChip } from '../../components/TrilhaChip'
 import { Painel } from '../../layout/AppShell'
 import { PageHeader, TituloTela } from '../../layout/PageHeader'
 import { escolha, useParametros } from '../../useParametros'
+import { DialogoAutoavaliacao } from '../edicao/formularios'
 
 type FiltroPilar = 'todos' | Pilar
 const ABAS: { valor: FiltroPilar; label: string }[] = [
@@ -36,6 +37,7 @@ export function Competencias() {
   const ciclo = useCiclo()
   const trilhas = useTrilhas()
   const [params, alterar] = useParametros()
+  const [editando, setEditando] = useState<string | null>(null)
 
   const pilar = escolha(params.get('pilar'), ['todos', ...PILARES], 'todos')
   const listaTrilhas = useMemo(() => trilhas.data?.itens ?? [], [trilhas.data])
@@ -107,8 +109,8 @@ export function Competencias() {
         </TituloTela>
 
         <EstadoConsulta carregando={carregando} erro={erro} />
-        {ciclo.data && !c && <p className="m-0 type-small text-ink-2">Nenhum ciclo encontrado: a autoavaliação aparece quando existir uma nota em Ciclos/.</p>}
-        {ciclo.data && <AvisoArquivos erros={[...ciclo.data.erros, ...(trilhas.data?.erros ?? [])]} />}
+        {ciclo.data && !c && <p className="m-0 type-small text-ink-2">Nenhum ciclo encontrado: crie um na Visão geral para registrar a autoavaliação.</p>}
+        {c && editando && <DialogoAutoavaliacao aberto onFechar={() => setEditando(null)} ciclo={c} competenciaId={editando} />}
 
         <div className="flex flex-wrap items-center gap-2">
           <label className="flex min-h-10 w-65 max-w-full items-center gap-2 rounded-md border border-line-strong bg-card px-3 text-ink-3 focus-within:outline-2 focus-within:outline-ink">
@@ -214,9 +216,22 @@ export function Competencias() {
                         </span>
                       </td>
                       <td className="py-3.5 pr-4 pl-2">
-                        <span className="inline-flex flex-col items-start gap-0.5">
-                          <StatusPill variante="competencia-status" valor={l.status} />
-                          {l.sugerido && <span className="type-micro font-normal text-ink-3">sugerido pelo nível</span>}
+                        <span className="flex items-center justify-between gap-2">
+                          <span className="inline-flex flex-col items-start gap-0.5">
+                            <StatusPill variante="competencia-status" valor={l.status} />
+                            {l.sugerido && <span className="type-micro font-normal text-ink-3">sugerido pelo nível</span>}
+                          </span>
+                          {c && (
+                            <button
+                              type="button"
+                              onClick={() => setEditando(l.comp.id)}
+                              aria-label={`Editar a autoavaliação de ${l.comp.nome}`}
+                              title="Editar autoavaliação"
+                              className="inline-flex size-8 pointer-coarse:size-11 shrink-0 items-center justify-center rounded-sm text-ink-3 hover:bg-muted hover:text-ink"
+                            >
+                              <Pencil aria-hidden="true" className="size-3.5" />
+                            </button>
+                          )}
                         </span>
                       </td>
                     </tr>
@@ -230,7 +245,7 @@ export function Competencias() {
 
         <p className="m-0 type-caption text-ink-3">
           Escala: comportamentais e ferramentas em Júnior · Pleno · Sênior; técnicas em Baixo · Médio · Alto · Especialidade. O ponto cheio marca o
-          nível atual e o ponto com contorno, a meta. A autoavaliação é editada no frontmatter do ciclo até a edição pelo painel chegar.
+          nível atual e o ponto com contorno, a meta. Use o lápis de cada linha para registrar o nível e o status.
         </p>
       </Painel>
     </>

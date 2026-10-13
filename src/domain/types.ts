@@ -60,14 +60,12 @@ export interface Persona {
   foco: string[]
 }
 
-// ---------- Dados da usuária (notas no vault: ADR-002) ----------
+// ---------- Dados da usuária (SQLite local: ADR-007) ----------
 
-/** Metadados comuns a toda entidade lida de um arquivo. */
-export interface Arquivo {
-  /** Caminho relativo à pasta do PDI, com `/`. */
-  arquivo: string
-  /** sha1 do conteúdo no momento da leitura (concorrência otimista). */
-  versao: string
+/** Metadados comuns a toda entidade gravada no banco. */
+export interface Versionado {
+  /** Incrementada a cada gravação (concorrência otimista: `If-Match`). */
+  versao: number
 }
 
 export interface Autoavaliacao {
@@ -76,7 +74,7 @@ export interface Autoavaliacao {
   status: StatusCompetencia | null
 }
 
-export interface Ciclo extends Arquivo {
+export interface Ciclo extends Versionado {
   id: string
   inicio: DataISO
   fim: DataISO
@@ -85,7 +83,7 @@ export interface Ciclo extends Arquivo {
   autoavaliacao: Record<string, Autoavaliacao>
 }
 
-export interface Trilha extends Arquivo {
+export interface Trilha extends Versionado {
   id: string
   nome: string
   descricao: string
@@ -99,7 +97,7 @@ export interface ItemChecklist {
   feito: boolean
 }
 
-export interface Acao extends Arquivo {
+export interface Acao extends Versionado {
   id: string
   titulo: string
   ciclo: string
@@ -109,11 +107,11 @@ export interface Acao extends Arquivo {
   prioridade: Prioridade
   prazo: DataISO | null
   marcos: ItemChecklist[]
-  /** Nomes de nota (alvos de wikilink) da seção `## Evidências`. */
+  /** Nomes de nota do vault (alvos de wikilink) usados como evidência. */
   evidencias: string[]
 }
 
-export interface Meta extends Arquivo {
+export interface Meta extends Versionado {
   id: string
   titulo: string
   trilha: string
@@ -127,7 +125,7 @@ export interface Meta extends Arquivo {
   concluidaEm: DataISO | null
 }
 
-export interface Reuniao extends Arquivo {
+export interface Reuniao extends Versionado {
   /** A data é o identificador da 1:1. */
   data: DataISO
   inicio: Hora
@@ -137,7 +135,7 @@ export interface Reuniao extends Arquivo {
   pauta: ItemChecklist[]
 }
 
-export interface Feedback extends Arquivo {
+export interface Feedback extends Versionado {
   id: string
   reuniao: DataISO
   tipo: TipoFeedback
@@ -146,13 +144,12 @@ export interface Feedback extends Arquivo {
   texto: string
 }
 
-export interface Projeto extends Arquivo {
-  /** Nome do arquivo sem extensão. */
+export interface Projeto extends Versionado {
+  /** Identificador curto (slug), gerado a partir do nome do projeto. */
   id: string
   /** Alvo do wikilink para a nota do projeto em `02 Projetos/`. */
   projeto: string
   pasta: string
-  /** Texto livre do começo da nota, antes das seções. */
   descricao: string
   trilhas: string[]
   status: StatusProjeto
@@ -160,7 +157,7 @@ export interface Projeto extends Arquivo {
   evidencias: string[]
 }
 
-export interface BlocoAgenda extends Arquivo {
+export interface BlocoAgenda extends Versionado {
   id: string
   titulo: string
   /** 0 = domingo … 6 = sábado. */
@@ -170,15 +167,4 @@ export interface BlocoAgenda extends Arquivo {
   de: DataISO
   ate: DataISO | null
   meta: string | null
-}
-
-/** Arquivo que não pôde ser lido como entidade (YAML inválido, campo faltando...). */
-export interface ArquivoComErro {
-  arquivo: string
-  mensagem: string
-}
-
-export interface Lista<T> {
-  itens: T[]
-  erros: ArquivoComErro[]
 }

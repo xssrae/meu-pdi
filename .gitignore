@@ -5,6 +5,6 @@ test-results/
 playwright-report/
 blob-report/
 *.tsbuildinfo
-.pdi-backup/
-/fixtures/
 .env.example
+docs/
+data/

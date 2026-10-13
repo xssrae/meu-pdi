@@ -4,8 +4,12 @@ import { existsSync } from 'node:fs'
 import path from 'node:path'
 
 export interface Config {
-  vaultDir: string
-  pdiDir: string
+  /** Caminho do banco SQLite, ou `:memory:`. */
+  db: string
+  /** Pasta dos backups diários; `null` com banco em memória. */
+  pastaBackups: string | null
+  /** JSON carregado quando o banco está vazio (testes e `npm run dev:e2e`). */
+  semente: string | null
   porta: number
   producao: boolean
   /** Data fixa para testes e demonstrações (`PDI_HOJE=AAAA-MM-DD`). */
@@ -17,11 +21,12 @@ export interface Config {
 /** Porta padrão do Vite em desenvolvimento, que faz proxy de `/api`. */
 export const PORTA_DEV_WEB = 5173
 
+export const DB_PADRAO = 'data/pdi.db'
+
 export function carregarConfig(env: NodeJS.ProcessEnv = process.env): Config {
   if (env === process.env && existsSync('.env')) process.loadEnvFile('.env')
 
-  const vaultDir = env.PDI_VAULT_DIR
-  if (!vaultDir) throw new Error('Defina PDI_VAULT_DIR no .env (veja .env.example).')
+  const db = env.PDI_DB === ':memory:' ? ':memory:' : path.resolve(env.PDI_DB || DB_PADRAO)
   const porta = Number(env.PDI_PORT ?? 5174)
   const producao = env.NODE_ENV === 'production'
   const hojeFixo = env.PDI_HOJE ?? null
@@ -32,8 +37,9 @@ export function carregarConfig(env: NodeJS.ProcessEnv = process.env): Config {
   const hostsPermitidos = portas.flatMap((p) => [`127.0.0.1:${p}`, `localhost:${p}`])
 
   return {
-    vaultDir: path.resolve(vaultDir),
-    pdiDir: path.resolve(vaultDir, env.PDI_DIR ?? '03 Areas/Carreira/PDI'),
+    db,
+    pastaBackups: db === ':memory:' ? null : path.join(path.dirname(db), 'backups'),
+    semente: env.PDI_SEMENTE ? path.resolve(env.PDI_SEMENTE) : null,
     porta,
     producao,
     hojeFixo,

@@ -1,24 +1,30 @@
 // Trilhas de carreira (F7, F10, F11): pastas T1…T5, detalhe da trilha
 // selecionada, status por trilha e o quadro Kanban das ações da trilha.
-// Só leitura até a Fase 4: os cards ainda não avançam nem voltam.
+// Criar e editar ações e trilhas, e mover os cards, grava no banco (ADR-007).
 
-import { ChevronRight } from 'lucide-react'
-import { Fragment, useMemo } from 'react'
+import { ChevronRight, Pencil, Plus } from 'lucide-react'
+import { Fragment, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router'
 import { competencia, NOME_NIVEL } from '../../../domain/framework'
-import { NIVEIS, STATUS_ACAO, type Nivel } from '../../../domain/types'
+import { NIVEIS, STATUS_ACAO, type Acao, type Nivel, type Trilha } from '../../../domain/types'
+import { useEscrita } from '../../api/mutacoes'
 import { useAcoes, useCiclo, useMetas, useTrilhas } from '../../api/queries'
 import { ActionCard } from '../../components/ActionCard'
+import { Button, IconButton } from '../../components/Button'
 import { Legenda } from '../../components/charts/Legenda'
 import { SegmentBar } from '../../components/charts/SegmentBar'
 import { cn } from '../../components/cn'
-import { AvisoArquivos, EstadoConsulta, Vazio } from '../../components/EstadoConsulta'
+import { EstadoConsulta, Vazio } from '../../components/EstadoConsulta'
 import { FolderCard } from '../../components/FolderCard'
 import { Secao } from '../../components/Secao'
 import { LEGENDA_STATUS, segmentosStatus, TOM_PILAR, TOM_STATUS_ACAO, TOM_TRILHA } from '../../components/tones'
+import { useToast } from '../../components/toast-context'
 import { plural } from '../../format'
 import { Painel } from '../../layout/AppShell'
 import { PageHeader, TituloTela } from '../../layout/PageHeader'
+import { DialogoAcao, DialogoTrilha } from '../edicao/formularios'
+
+type Edicao = { tipo: 'nova-acao' } | { tipo: 'acao'; acao: Acao } | { tipo: 'nova-trilha' } | { tipo: 'trilha'; trilha: Trilha } | null
 
 export function Trilhas() {
   const { id } = useParams()
@@ -26,6 +32,20 @@ export function Trilhas() {
   const acoes = useAcoes()
   const metas = useMetas()
   const ciclo = useCiclo()
+  const [edicao, setEdicao] = useState<Edicao>(null)
+  const escrita = useEscrita()
+  const avisar = useToast()
+  const fechar = () => setEdicao(null)
+
+  function mover(a: Acao, para: Acao['status']) {
+    escrita.mutate(
+      { op: 'atualizar', entidade: 'acoes', chave: a.id, versao: a.versao, patch: { status: para } },
+      {
+        onSuccess: () => avisar(`${a.id} movida para ${TOM_STATUS_ACAO[para].label}`),
+        onError: (e) => avisar(e.message, 'erro'),
+      },
+    )
+  }
 
   const lista = useMemo(() => trilhas.data?.itens ?? [], [trilhas.data])
   const sel = lista.find((t) => t.id === id) ?? lista[0]
@@ -39,7 +59,22 @@ export function Trilhas() {
 
   return (
     <>
-      <PageHeader trilha={['Painel', 'Trilhas de carreira', ...(sel ? [sel.nome] : [])]} />
+      <PageHeader trilha={['Painel', 'Trilhas de carreira', ...(sel ? [sel.nome] : [])]}>
+        <Button icone={<Plus aria-hidden="true" className="size-4" />} onClick={() => setEdicao({ tipo: 'nova-trilha' })}>
+          Nova trilha
+        </Button>
+        <Button
+          variante="primario"
+          icone={<Plus aria-hidden="true" className="size-4" />}
+          disabled={!sel || !ciclo.data?.ciclo}
+          title={!ciclo.data?.ciclo ? 'Crie um ciclo na Visão geral antes' : undefined}
+          onClick={() => setEdicao({ tipo: 'nova-acao' })}
+        >
+          Nova ação
+        </Button>
+      </PageHeader>
+      <DialogoAcao aberto={edicao?.tipo === 'nova-acao' || edicao?.tipo === 'acao'} onFechar={fechar} acao={edicao?.tipo === 'acao' ? edicao.acao : undefined} trilhaPadrao={sel?.id} />
+      <DialogoTrilha aberto={edicao?.tipo === 'nova-trilha' || edicao?.tipo === 'trilha'} onFechar={fechar} trilha={edicao?.tipo === 'trilha' ? edicao.trilha : undefined} />
       <Painel>
         <TituloTela titulo="Trilhas de carreira" subtitulo="Cada trilha agrupa ações que desenvolvem um conjunto de competências rumo ao próximo nível.">
           {ciclo.data?.ciclo && <Niveis atual={ciclo.data.ciclo.nivelAtual} alvo={ciclo.data.ciclo.nivelAlvo} />}
@@ -51,8 +86,7 @@ export function Trilhas() {
             A trilha {id} não existe; mostrando {sel?.id ?? 'a primeira'}.
           </p>
         )}
-        {trilhas.data && <AvisoArquivos erros={[...trilhas.data.erros, ...(acoes.data?.erros ?? [])]} />}
-        {trilhas.data && !lista.length && <Vazio>Nenhuma trilha encontrada. Crie notas em Trilhas/ na pasta do PDI.</Vazio>}
+        {trilhas.data && !lista.length && <Vazio>Nenhuma trilha ainda. Use “Nova trilha” para criar a primeira.</Vazio>}
 
         {sel && (
           <>
@@ -104,12 +138,15 @@ export function Trilhas() {
                   <span className={cn('flex size-10 shrink-0 items-center justify-center rounded-md type-mono', TOM_TRILHA[sel.cor].bg, TOM_TRILHA[sel.cor].fg)}>
                     {sel.id}
                   </span>
-                  <div className="flex flex-col gap-1">
+                  <div className="flex min-w-0 flex-1 flex-col gap-1">
                     <h2 id="titulo-trilha" className="m-0 text-[20px] leading-tight font-semibold">
                       {sel.nome}
                     </h2>
                     {sel.descricao && <p className="m-0 type-body text-ink-2">{sel.descricao}</p>}
                   </div>
+                  <IconButton rotulo={`Editar a trilha ${sel.id}`} className="shrink-0" onClick={() => setEdicao({ tipo: 'trilha', trilha: sel })}>
+                    <Pencil aria-hidden="true" className="size-4" />
+                  </IconButton>
                 </div>
                 <div className="grid grid-cols-3 gap-2">
                   <Numero valor={`${sel.resumo.pct}%`} rotulo="concluído" />
@@ -169,7 +206,7 @@ export function Trilhas() {
                   </h2>
                   <span className={cn('rounded-xs px-2 py-0.5 type-caption', TOM_TRILHA[sel.cor].bg, TOM_TRILHA[sel.cor].fg)}>{sel.nome}</span>
                 </div>
-                <span className="type-small text-ink-3">Mover cards pelo painel chega com a escrita no vault</span>
+                <span className="type-small text-ink-3">Avance ou volte cada card pelos botões dele</span>
               </div>
               <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,240px),1fr))] items-start gap-4">
                 {STATUS_ACAO.map((s) => {
@@ -183,7 +220,13 @@ export function Trilhas() {
                         <span className="rounded-full bg-card px-2 py-px type-caption font-semibold text-ink">{cards.length}</span>
                       </h3>
                       {cards.map((a) => (
-                        <ActionCard key={a.id} acao={a} />
+                        <ActionCard
+                          key={a.id}
+                          acao={a}
+                          ocupado={escrita.isPending}
+                          onMover={(para) => mover(a, para)}
+                          onEditar={() => setEdicao({ tipo: 'acao', acao: a })}
+                        />
                       ))}
                       {!cards.length && <Vazio>Nenhuma ação aqui.</Vazio>}
                     </section>

@@ -24,8 +24,7 @@ function acao(id: string, status: StatusAcao, marcos: [number, number], trilha =
   const [feitos, total] = marcos
   return {
     id,
-    arquivo: `Acoes/${id}.md`,
-    versao: 'x',
+    versao: 1,
     titulo: id,
     ciclo: '2026.2',
     trilha,

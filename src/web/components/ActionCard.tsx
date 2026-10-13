@@ -1,4 +1,4 @@
-import { CalendarDays, Check, ChevronLeft, Target } from 'lucide-react'
+import { CalendarDays, Check, ChevronLeft, Pencil, Target } from 'lucide-react'
 import { competencia } from '../../domain/framework'
 import { progressoChecklist, proximoStatus, statusAnterior } from '../../domain/metrics'
 import type { Acao } from '../../domain/types'
@@ -10,12 +10,14 @@ import { dataCurta } from '../format'
 interface Props {
   acao: Pick<Acao, 'id' | 'titulo' | 'competenciaId' | 'prioridade' | 'prazo' | 'marcos' | 'status'> & { meta?: string | null }
   onMover?: (para: Acao['status']) => void
+  /** Abre a edição (e a exclusão) da ação. */
+  onEditar?: () => void
   /** Desabilita os botões enquanto a mudança é gravada. */
   ocupado?: boolean
 }
 
 /** Card do quadro Kanban: Avançar e Voltar como botões acessíveis por teclado. */
-export function ActionCard({ acao, onMover, ocupado }: Props) {
+export function ActionCard({ acao, onMover, onEditar, ocupado }: Props) {
   const marcos = progressoChecklist(acao.marcos)
   const prox = proximoStatus(acao.status)
   const ant = statusAnterior(acao.status)
@@ -24,7 +26,20 @@ export function ActionCard({ acao, onMover, ocupado }: Props) {
     <article className="flex flex-col gap-3 rounded-lg border border-line bg-card p-3.5 shadow-1">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span className="type-mono text-ink-3">{acao.id}</span>
-        <StatusPill variante="prioridade" valor={acao.prioridade} />
+        <span className="flex items-center gap-1">
+          <StatusPill variante="prioridade" valor={acao.prioridade} />
+          {onEditar && (
+            <button
+              type="button"
+              onClick={onEditar}
+              aria-label={`Editar ${acao.id}`}
+              title="Editar"
+              className="-mr-1.5 inline-flex size-8 pointer-coarse:size-11 items-center justify-center rounded-sm text-ink-3 hover:bg-muted hover:text-ink"
+            >
+              <Pencil aria-hidden="true" className="size-3.5" />
+            </button>
+          )}
+        </span>
       </div>
       <div className="flex flex-col gap-1">
         <h3 className="m-0 type-title">{acao.titulo}</h3>

@@ -1,19 +1,20 @@
 // Planejamentos (F13, F14): calendário mensal com 1:1s e prazos, painel do
 // dia, metas da 1:1 com estado progresso × tempo e a linha do tempo das metas.
+// Criar, editar e excluir metas grava no banco (ADR-007).
 
-import { ChevronLeft, ChevronRight, Users } from 'lucide-react'
-import { useMemo } from 'react'
+import { ChevronLeft, ChevronRight, Pencil, Plus, Users } from 'lucide-react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router'
 import type { Evento, MetaVista } from '../../../domain/aggregates'
 import { dataValida, gradeDoMes, inicioDaSemana, limitesDoMes, mesDe, mesValido, somarMeses } from '../../../domain/datas'
 import { diasEntre, hojeISO } from '../../../domain/metrics'
 import { ESTADOS_META, type CorTrilha, type EstadoMeta, type Reuniao, type Trilha } from '../../../domain/types'
 import { useAgenda, useMetas, useResumo, useReunioes, useTrilhas } from '../../api/queries'
-import { ButtonLink, IconButton } from '../../components/Button'
+import { Button, ButtonLink, IconButton } from '../../components/Button'
 import { CalendarEvent } from '../../components/CalendarEvent'
 import { ProgressTime } from '../../components/charts/ProgressTime'
 import { cn } from '../../components/cn'
-import { AvisoArquivos, EstadoConsulta } from '../../components/EstadoConsulta'
+import { EstadoConsulta } from '../../components/EstadoConsulta'
 import { FilterChips } from '../../components/FilterChips'
 import { Secao } from '../../components/Secao'
 import { StatusPill } from '../../components/StatusPill'
@@ -23,6 +24,7 @@ import { dataCurta, diaPorExtenso, nomeDoMes, plural } from '../../format'
 import { Painel } from '../../layout/AppShell'
 import { PageHeader, TituloTela } from '../../layout/PageHeader'
 import { escolha, useParametros } from '../../useParametros'
+import { DialogoMeta } from '../edicao/formularios'
 
 type FiltroEstado = 'todas' | EstadoMeta
 const ROTULO_FILTRO: Record<FiltroEstado, string> = {
@@ -52,6 +54,8 @@ export function Planejamentos() {
   const metas = useMetas()
   const trilhas = useTrilhas()
   const reunioes = useReunioes()
+  /** `null` fechado; `'nova'` cria; uma meta, edita. */
+  const [edicao, setEdicao] = useState<MetaVista | 'nova' | null>(null)
 
   const corDe = useMemo(() => new Map((trilhas.data?.itens ?? []).map((t) => [t.id, t.cor])), [trilhas.data])
   const todasMetas = metas.data?.itens ?? []
@@ -75,7 +79,11 @@ export function Planejamentos() {
             Próxima 1:1 · {dataCurta(proxima.data)}
           </ButtonLink>
         )}
+        <Button variante="primario" icone={<Plus aria-hidden="true" className="size-4" />} onClick={() => setEdicao('nova')}>
+          Nova meta
+        </Button>
       </PageHeader>
+      <DialogoMeta aberto={edicao !== null} onFechar={() => setEdicao(null)} meta={edicao === 'nova' ? undefined : (edicao ?? undefined)} />
       <Painel>
         <TituloTela
           titulo="Planejamentos"
@@ -94,7 +102,6 @@ export function Planejamentos() {
         </TituloTela>
 
         <EstadoConsulta carregando={carregando} erro={erro} />
-        {metas.data && <AvisoArquivos erros={[...metas.data.erros, ...(agenda.data?.erros ?? [])]} />}
 
         <div className="flex flex-wrap items-start gap-4">
           <section aria-labelledby="titulo-mes" className="flex min-w-0 flex-[999_1_600px] flex-col gap-3.5 rounded-xl border border-line bg-card p-5">
@@ -178,11 +185,17 @@ export function Planejamentos() {
               {filtradas.length ? (
                 <ul className="m-0 flex list-none flex-col p-0">
                   {filtradas.map((m) => (
-                    <ItemMeta key={m.id} meta={m} cor={corDe.get(m.trilha)} trilha={trilhas.data?.itens.find((t) => t.id === m.trilha)} />
+                    <ItemMeta
+                      key={m.id}
+                      meta={m}
+                      cor={corDe.get(m.trilha)}
+                      trilha={trilhas.data?.itens.find((t) => t.id === m.trilha)}
+                      onEditar={() => setEdicao(m)}
+                    />
                   ))}
                 </ul>
               ) : (
-                <p className="m-0 pt-2 type-small text-ink-3">{todasMetas.length ? 'Nenhuma meta com esse estado.' : 'Nenhuma meta registrada em Metas/.'}</p>
+                <p className="m-0 pt-2 type-small text-ink-3">{todasMetas.length ? 'Nenhuma meta com esse estado.' : 'Nenhuma meta ainda. Use “Nova meta” para registrar a primeira.'}</p>
               )}
             </Secao>
           </aside>
@@ -281,7 +294,7 @@ function destino(e: Evento, hoje: string, metas: MetaVista[]): { to: string; sub
   return { to: e.trilha ? `/trilhas/${e.trilha}` : '/trilhas', sub: `Prazo da ação${e.trilha ? ` · ${e.trilha}` : ''}` }
 }
 
-function ItemMeta({ meta: m, cor, trilha }: { meta: MetaVista; cor?: CorTrilha; trilha?: Trilha }) {
+function ItemMeta({ meta: m, cor, trilha, onEditar }: { meta: MetaVista; cor?: CorTrilha; trilha?: Trilha; onEditar: () => void }) {
   return (
     <li id={`meta-${m.id}`} className="flex scroll-mt-4 flex-col gap-2 border-t border-divider py-3 first:border-t-0 target:rounded-sm target:ring-select">
       <div className="flex items-start justify-between gap-2">
@@ -291,7 +304,18 @@ function ItemMeta({ meta: m, cor, trilha }: { meta: MetaVista; cor?: CorTrilha; 
           </span>
           <span className="type-body leading-snug font-semibold">{m.titulo}</span>
         </span>
-        <StatusPill variante="meta-estado" valor={m.estado} className="shrink-0" />
+        <span className="flex shrink-0 items-center gap-1">
+          <StatusPill variante="meta-estado" valor={m.estado} />
+          <button
+            type="button"
+            onClick={onEditar}
+            aria-label={`Editar ${m.id}`}
+            title="Editar"
+            className="-mr-1.5 inline-flex size-8 pointer-coarse:size-11 items-center justify-center rounded-sm text-ink-3 hover:bg-muted hover:text-ink"
+          >
+            <Pencil aria-hidden="true" className="size-3.5" />
+          </button>
+        </span>
       </div>
       <ProgressTime progresso={m.progresso} tempo={m.tempoDecorrido} />
       <div className="flex flex-wrap items-center gap-1.5 type-caption text-ink-2">

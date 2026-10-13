@@ -1,13 +1,15 @@
 // Projetos (F18): pastas, lista e detalhe dos projetos usados como evidência
-// do PDI. Sem upload de imagens (ADR-004 ainda proposto) e sem abrir as
-// evidências no Obsidian, que chega na Fase 5.
+// do PDI. Criar, editar e excluir projetos grava no banco (ADR-007). Sem
+// upload de imagens (ADR-004 ainda proposto) e sem abrir as evidências no
+// Obsidian, que chega na Fase 5.
 
-import { FileText, ImageIcon } from 'lucide-react'
-import { useMemo } from 'react'
+import { FileText, ImageIcon, Pencil, Plus } from 'lucide-react'
+import { useMemo, useState } from 'react'
 import type { Projeto, Trilha } from '../../../domain/types'
 import { useProjetos, useTrilhas } from '../../api/queries'
+import { Button, IconButton } from '../../components/Button'
 import { cn } from '../../components/cn'
-import { AvisoArquivos, EstadoConsulta, Vazio } from '../../components/EstadoConsulta'
+import { EstadoConsulta, Vazio } from '../../components/EstadoConsulta'
 import { FolderCard } from '../../components/FolderCard'
 import { ROTULO_STATUS_PROJETO, TOM_TRILHA, tomPasta } from '../../components/tones'
 import { TrilhaChip } from '../../components/TrilhaChip'
@@ -15,6 +17,7 @@ import { plural } from '../../format'
 import { Painel } from '../../layout/AppShell'
 import { PageHeader, TituloTela } from '../../layout/PageHeader'
 import { escolha, useParametros } from '../../useParametros'
+import { DialogoProjeto } from '../edicao/formularios'
 
 /** `rayo-cozy-space` → `RC` */
 function sigla(nome: string): string {
@@ -26,6 +29,7 @@ export function Projetos() {
   const projetos = useProjetos()
   const trilhas = useTrilhas()
   const [params, alterar] = useParametros()
+  const [edicao, setEdicao] = useState<Projeto | 'novo' | null>(null)
 
   const todos = useMemo(() => projetos.data?.itens ?? [], [projetos.data])
   const listaTrilhas = useMemo(() => trilhas.data?.itens ?? [], [trilhas.data])
@@ -46,7 +50,12 @@ export function Projetos() {
 
   return (
     <>
-      <PageHeader trilha={['Painel', 'Projetos']} />
+      <PageHeader trilha={['Painel', 'Projetos']}>
+        <Button variante="primario" icone={<Plus aria-hidden="true" className="size-4" />} onClick={() => setEdicao('novo')}>
+          Novo projeto
+        </Button>
+      </PageHeader>
+      <DialogoProjeto aberto={edicao !== null} onFechar={() => setEdicao(null)} projeto={edicao === 'novo' ? undefined : (edicao ?? undefined)} />
       <Painel>
         <TituloTela
           titulo="Projetos"
@@ -70,8 +79,7 @@ export function Projetos() {
         </TituloTela>
 
         <EstadoConsulta carregando={projetos.isPending} erro={projetos.error} />
-        {projetos.data && <AvisoArquivos erros={projetos.data.erros} />}
-        {projetos.data && !todos.length && <Vazio>Nenhum projeto em Projetos/. Cada nota aponta para a nota do projeto em 02 Projetos/.</Vazio>}
+        {projetos.data && !todos.length && <Vazio>Nenhum projeto ainda. Use “Novo projeto” e aponte para a nota dele em 02 Projetos/.</Vazio>}
 
         {pastas.length > 0 && (
           <section aria-labelledby="titulo-pastas" className="flex flex-col gap-3.5">
@@ -129,7 +137,7 @@ export function Projetos() {
                 <Vazio>Nenhum projeto com esses filtros.</Vazio>
               )}
             </section>
-            {sel && <Detalhe projeto={sel} trilhaDe={trilhaDe} />}
+            {sel && <Detalhe projeto={sel} trilhaDe={trilhaDe} onEditar={() => setEdicao(sel)} />}
           </div>
         )}
       </Painel>
@@ -175,7 +183,7 @@ function CardProjeto({ projeto: p, trilhaDe, selecionado, onClick }: { projeto: 
   )
 }
 
-function Detalhe({ projeto: p, trilhaDe }: { projeto: Projeto; trilhaDe: Map<string, Trilha> }) {
+function Detalhe({ projeto: p, trilhaDe, onEditar }: { projeto: Projeto; trilhaDe: Map<string, Trilha>; onEditar: () => void }) {
   return (
     <aside aria-labelledby="titulo-projeto" className="flex min-w-0 flex-[1_1_320px] flex-col gap-4 rounded-2xl border border-line bg-card p-5">
       <div className="flex items-start justify-between gap-2">
@@ -185,7 +193,12 @@ function Detalhe({ projeto: p, trilhaDe }: { projeto: Projeto; trilhaDe: Map<str
             {p.id}
           </h2>
         </div>
-        <span className="rounded-xs bg-soft px-2 py-1 type-caption text-ink-2">{ROTULO_STATUS_PROJETO[p.status]}</span>
+        <span className="flex shrink-0 items-center gap-2">
+          <span className="rounded-xs bg-soft px-2 py-1 type-caption text-ink-2">{ROTULO_STATUS_PROJETO[p.status]}</span>
+          <IconButton rotulo={`Editar o projeto ${p.projeto}`} onClick={onEditar}>
+            <Pencil aria-hidden="true" className="size-4" />
+          </IconButton>
+        </span>
       </div>
       {p.descricao && <p className="m-0 type-body text-ink-2">{p.descricao}</p>}
 
@@ -218,7 +231,7 @@ function Detalhe({ projeto: p, trilhaDe }: { projeto: Projeto; trilhaDe: Map<str
             ))}
           </ul>
         ) : (
-          <p className="m-0 type-small text-ink-3">Nenhuma evidência ligada ainda. Adicione wikilinks na seção “## Evidências” da nota.</p>
+          <p className="m-0 type-small text-ink-3">Nenhuma evidência ligada ainda. Adicione notas do vault em “Editar”.</p>
         )}
       </div>
 

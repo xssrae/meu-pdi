@@ -1,12 +1,14 @@
 // Visão geral (F19): KPIs, pastas das trilhas, status por trilha, rosca,
 // próxima 1:1, prazos e últimos feedbacks. Tudo vem de `/api/resumo`.
 
-import { ArrowRight, TriangleAlert } from 'lucide-react'
+import { ArrowRight, Plus } from 'lucide-react'
+import { useState } from 'react'
 import { Link } from 'react-router'
 import type { Resumo } from '../../../domain/aggregates'
 import { NOME_NIVEL } from '../../../domain/framework'
-import { STATUS_ACAO, type ArquivoComErro, type CorTrilha } from '../../../domain/types'
+import { STATUS_ACAO, type CorTrilha } from '../../../domain/types'
 import { useResumo } from '../../api/queries'
+import { Button } from '../../components/Button'
 import { Donut } from '../../components/charts/Donut'
 import { Legenda } from '../../components/charts/Legenda'
 import { SegmentBar } from '../../components/charts/SegmentBar'
@@ -21,10 +23,12 @@ import { TrilhaChip } from '../../components/TrilhaChip'
 import { dataCurta, intervaloMeses, plural } from '../../format'
 import { Painel } from '../../layout/AppShell'
 import { PageHeader, TituloTela } from '../../layout/PageHeader'
+import { DialogoCiclo } from '../edicao/formularios'
 import { CardProximaReuniao } from '../reunioes/CardProximaReuniao'
 
 export function VisaoGeral() {
   const { data, isPending, error } = useResumo()
+  const [criandoCiclo, setCriandoCiclo] = useState(false)
 
   return (
     <>
@@ -53,10 +57,14 @@ export function VisaoGeral() {
         <EstadoConsulta carregando={isPending} erro={error} />
 
         {data && !data.ciclo && (
-          <div className="rounded-xl border border-line bg-card p-5 type-body text-ink-2">
-            Nenhum ciclo encontrado. Crie uma nota em <code className="type-mono">Ciclos/</code> na pasta do PDI.
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-card p-5 type-body text-ink-2">
+            Nenhum ciclo ainda. O ciclo define o período do PDI e o nível-alvo.
+            <Button variante="primario" icone={<Plus aria-hidden="true" className="size-4" />} onClick={() => setCriandoCiclo(true)}>
+              Criar ciclo
+            </Button>
           </div>
         )}
+        <DialogoCiclo aberto={criandoCiclo} onFechar={() => setCriandoCiclo(false)} />
 
         {data && (
           <>
@@ -75,7 +83,6 @@ export function VisaoGeral() {
                 <UltimosFeedbacks feedbacks={data.ultimosFeedbacks} />
               </aside>
             </div>
-            <ArquivosComErro erros={data.erros} />
           </>
         )}
       </Painel>
@@ -196,7 +203,7 @@ function ProximaReuniao({ proxima }: { proxima: Resumo['proximaReuniao'] }) {
   if (!proxima) {
     return (
       <Secao titulo="Próxima 1:1" link={{ to: '/reunioes', rotulo: 'Reuniões' }}>
-        <p className="m-0 type-small text-ink-3">Nenhuma 1:1 agendada. Crie uma nota em Reunioes/ com status agendada.</p>
+        <p className="m-0 type-small text-ink-3">Nenhuma 1:1 agendada. Marque a próxima em Reuniões 1:1.</p>
       </Secao>
     )
   }
@@ -276,25 +283,5 @@ function UltimosFeedbacks({ feedbacks }: { feedbacks: Resumo['ultimosFeedbacks']
         <p className="m-0 type-small text-ink-3">Nenhum feedback registrado.</p>
       )}
     </Secao>
-  )
-}
-
-function ArquivosComErro({ erros }: { erros: readonly ArquivoComErro[] }) {
-  if (!erros.length) return null
-  return (
-    <section aria-labelledby="arquivos-erro" className="flex flex-col gap-2 rounded-xl border border-meta-risco-bg bg-card p-5">
-      <h2 id="arquivos-erro" className="m-0 flex items-center gap-2 type-h2">
-        <TriangleAlert aria-hidden="true" className="size-4.5 text-meta-risco-fg" />
-        Arquivos com erro
-      </h2>
-      <p className="m-0 type-small text-ink-2">Estas notas foram ignoradas. Corrija no Obsidian e volte a esta janela.</p>
-      <ul className="m-0 flex list-none flex-col gap-1 p-0">
-        {erros.map((e) => (
-          <li key={e.arquivo} className="type-small">
-            <span className="type-mono">{e.arquivo}</span> · <span className="text-ink-2">{e.mensagem}</span>
-          </li>
-        ))}
-      </ul>
-    </section>
   )
 }

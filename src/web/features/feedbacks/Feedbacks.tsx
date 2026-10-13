@@ -1,17 +1,17 @@
 // Feedbacks (F17): feedbacks das 1:1s agrupados por reunião, com filtros por
 // 1:1 e por tipo. Cada um aponta para a competência, as trilhas dela e a meta
-// que gerou. Registrar e "Transformar em meta" chegam com a escrita (Fase 4).
+// que gerou. Registrar, editar e "Transformar em meta" gravam no banco (ADR-007).
 
-import { CircleCheck, Users } from 'lucide-react'
-import { useMemo } from 'react'
+import { CircleCheck, Pencil, Plus, Target, Users } from 'lucide-react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router'
 import { inicioDaSemana } from '../../../domain/datas'
 import { competencia } from '../../../domain/framework'
 import { TIPOS_FEEDBACK, type Feedback, type Reuniao, type Trilha } from '../../../domain/types'
 import { useFeedbacks, useResumo, useReunioes, useTrilhas } from '../../api/queries'
-import { ButtonLink } from '../../components/Button'
+import { Button, ButtonLink } from '../../components/Button'
 import { cn } from '../../components/cn'
-import { AvisoArquivos, EstadoConsulta, Vazio } from '../../components/EstadoConsulta'
+import { EstadoConsulta, Vazio } from '../../components/EstadoConsulta'
 import { FilterChips } from '../../components/FilterChips'
 import { StatusPill } from '../../components/StatusPill'
 import { TOM_TIPO_FEEDBACK } from '../../components/tones'
@@ -20,6 +20,9 @@ import { dataCurta, diaPorExtenso, emDias } from '../../format'
 import { Painel } from '../../layout/AppShell'
 import { PageHeader, TituloTela } from '../../layout/PageHeader'
 import { escolha, useParametros } from '../../useParametros'
+import { DialogoFeedback, DialogoMeta } from '../edicao/formularios'
+
+type Edicao = { tipo: 'novo' } | { tipo: 'feedback'; feedback: Feedback } | { tipo: 'meta'; feedback: Feedback } | null
 
 export function Feedbacks() {
   const feedbacks = useFeedbacks()
@@ -27,6 +30,8 @@ export function Feedbacks() {
   const trilhas = useTrilhas()
   const resumo = useResumo()
   const [params, alterar] = useParametros()
+  const [edicao, setEdicao] = useState<Edicao>(null)
+  const fechar = () => setEdicao(null)
 
   const todos = useMemo(() => feedbacks.data?.itens ?? [], [feedbacks.data])
   // Datas de 1:1 com feedback, da mais recente para a mais antiga.
@@ -54,7 +59,25 @@ export function Feedbacks() {
         <ButtonLink to="/reunioes" icone={<Users aria-hidden="true" className="size-4" />}>
           Reuniões 1:1
         </ButtonLink>
+        <Button variante="primario" icone={<Plus aria-hidden="true" className="size-4" />} onClick={() => setEdicao({ tipo: 'novo' })}>
+          Registrar feedback
+        </Button>
       </PageHeader>
+      <DialogoFeedback
+        aberto={edicao?.tipo === 'novo' || edicao?.tipo === 'feedback'}
+        onFechar={fechar}
+        feedback={edicao?.tipo === 'feedback' ? edicao.feedback : undefined}
+        reuniaoPadrao={reuniao === 'todas' ? undefined : reuniao}
+      />
+      <DialogoMeta
+        aberto={edicao?.tipo === 'meta'}
+        onFechar={fechar}
+        padrao={
+          edicao?.tipo === 'meta'
+            ? { feedback: edicao.feedback.id, reuniao: edicao.feedback.reuniao, trilha: trilhasDe.get(edicao.feedback.competenciaId)?.[0]?.id }
+            : undefined
+        }
+      />
       <Painel>
         <TituloTela
           titulo="Feedbacks"
@@ -62,7 +85,6 @@ export function Feedbacks() {
         />
 
         <EstadoConsulta carregando={feedbacks.isPending} erro={feedbacks.error} />
-        {feedbacks.data && <AvisoArquivos erros={feedbacks.data.erros} />}
 
         <div className="flex flex-wrap items-start gap-4">
           <aside aria-label="Reuniões" className="flex min-w-0 flex-[1_1_240px] flex-col gap-4">
@@ -103,9 +125,17 @@ export function Feedbacks() {
             />
 
             {grupos.map((g) => (
-              <Grupo key={g.data} data={g.data} reuniao={g.reuniao} itens={g.itens} trilhasDe={trilhasDe} />
+              <Grupo
+                key={g.data}
+                data={g.data}
+                reuniao={g.reuniao}
+                itens={g.itens}
+                trilhasDe={trilhasDe}
+                onEditar={(feedback) => setEdicao({ tipo: 'feedback', feedback })}
+                onVirarMeta={(feedback) => setEdicao({ tipo: 'meta', feedback })}
+              />
             ))}
-            {feedbacks.data && !grupos.length && <Vazio>{todos.length ? 'Nenhum feedback com esses filtros.' : 'Nenhum feedback registrado em Feedbacks/.'}</Vazio>}
+            {feedbacks.data && !grupos.length && <Vazio>{todos.length ? 'Nenhum feedback com esses filtros.' : 'Nenhum feedback ainda. Use “Registrar feedback” depois de uma 1:1.'}</Vazio>}
           </div>
         </div>
       </Painel>
@@ -133,7 +163,21 @@ function FiltroReuniao({ ativo, onClick, rotulo, sub, n }: { ativo: boolean; onC
   )
 }
 
-function Grupo({ data, reuniao, itens, trilhasDe }: { data: string; reuniao?: Reuniao; itens: Feedback[]; trilhasDe: Map<string, Trilha[]> }) {
+function Grupo({
+  data,
+  reuniao,
+  itens,
+  trilhasDe,
+  onEditar,
+  onVirarMeta,
+}: {
+  data: string
+  reuniao?: Reuniao
+  itens: Feedback[]
+  trilhasDe: Map<string, Trilha[]>
+  onEditar: (f: Feedback) => void
+  onVirarMeta: (f: Feedback) => void
+}) {
   const id = `fb-${data}`
   return (
     <section aria-labelledby={id} className="flex flex-col gap-2.5">
@@ -150,7 +194,18 @@ function Grupo({ data, reuniao, itens, trilhasDe }: { data: string; reuniao?: Re
           <article key={f.id} aria-label={`${f.id}, ${TOM_TIPO_FEEDBACK[f.tipo].label}`} className="flex flex-col gap-3 rounded-xl border border-line bg-card p-4">
             <div className="flex items-center justify-between gap-2">
               <StatusPill variante="feedback-tipo" valor={f.tipo} />
-              <span className="type-micro font-mono text-ink-3">{f.id}</span>
+              <span className="flex items-center gap-1">
+                <span className="type-micro font-mono text-ink-3">{f.id}</span>
+                <button
+                  type="button"
+                  onClick={() => onEditar(f)}
+                  aria-label={`Editar ${f.id}`}
+                  title="Editar"
+                  className="-mr-1.5 inline-flex size-8 pointer-coarse:size-11 items-center justify-center rounded-sm text-ink-3 hover:bg-muted hover:text-ink"
+                >
+                  <Pencil aria-hidden="true" className="size-3.5" />
+                </button>
+              </span>
             </div>
             <blockquote className="m-0 text-[15px] leading-normal">“{f.texto}”</blockquote>
             <div className="flex flex-wrap items-center justify-between gap-2 border-t border-divider pt-3">
@@ -170,6 +225,11 @@ function Grupo({ data, reuniao, itens, trilhasDe }: { data: string; reuniao?: Re
                   <CircleCheck aria-hidden="true" className="size-4" />
                   Virou a meta {f.meta}
                 </Link>
+              )}
+              {!f.meta && (
+                <Button variante="suave" icone={<Target aria-hidden="true" className="size-3.5" />} onClick={() => onVirarMeta(f)} aria-label={`Transformar ${f.id} em meta`}>
+                  Transformar em meta
+                </Button>
               )}
             </div>
           </article>

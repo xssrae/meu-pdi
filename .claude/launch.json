@@ -4,7 +4,15 @@
     {
       "name": "meu-pdi-fixture",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["cross-env", "PDI_HOJE=2026-10-11", "PDI_PORT=5184", "PDI_WEB_PORT=5183", "npm", "run", "dev:fixture"],
+      "runtimeArgs": [
+        "cross-env",
+        "PDI_HOJE=2026-10-11",
+        "PDI_PORT=5184",
+        "PDI_WEB_PORT=5183",
+        "npm",
+        "run",
+        "dev:e2e"
+      ],
       "port": 5183,
       "url": "http://127.0.0.1:5183",
       "autoPort": false

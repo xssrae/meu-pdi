@@ -1,8 +1,8 @@
 import { defineConfig, devices } from '@playwright/test'
 
-// Roda contra o vault de fixture, em portas próprias (5183/5184) para não
-// reaproveitar um `npm run dev` aberto no vault real. As larguras seguem
-// CodingPreferences: 375, 768 e 1440 px.
+// Roda contra o vault de teste (`tests/fixtures/vault`), em portas próprias
+// (5183/5184) para não reaproveitar um `npm run dev` aberto no vault real.
+// As larguras seguem CodingPreferences: 375, 768 e 1440 px.
 const WEB = 'http://127.0.0.1:5183'
 
 export default defineConfig({
@@ -28,7 +28,7 @@ export default defineConfig({
     { name: 'desktop-1440', use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } } },
   ],
   webServer: {
-    command: 'npm run dev:fixture',
+    command: 'npm run dev:e2e',
     url: `${WEB}/api/saude`,
     reuseExistingServer: !process.env.CI,
     timeout: 60_000,

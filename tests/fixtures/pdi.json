@@ -1,0 +1,931 @@
+{
+  "ciclos": [
+    {
+      "id": "2026.2",
+      "inicio": "2026-07-01",
+      "fim": "2026-12-31",
+      "nivelAtual": "junior",
+      "nivelAlvo": "pleno",
+      "autoavaliacao": {
+        "planejamento-execucao": {
+          "nivel": 1,
+          "status": "em-evolucao"
+        },
+        "comunicacao": {
+          "nivel": 1,
+          "status": "em-evolucao"
+        },
+        "geracao-valor": {
+          "nivel": 1,
+          "status": "em-evolucao"
+        },
+        "negociacao": {
+          "nivel": 1,
+          "status": "nao-iniciada"
+        },
+        "mobilizacao": {
+          "nivel": 2,
+          "status": "na-meta"
+        },
+        "metodos-trabalho": {
+          "nivel": 2,
+          "status": "na-meta"
+        },
+        "gestao-produto": {
+          "nivel": 1,
+          "status": "em-evolucao"
+        },
+        "ia": {
+          "nivel": 2,
+          "status": "na-meta"
+        },
+        "colaboracao": {
+          "nivel": 2,
+          "status": "na-meta"
+        },
+        "codificacao": {
+          "nivel": 2,
+          "status": "na-meta"
+        },
+        "system-design": {
+          "nivel": 1,
+          "status": "em-evolucao"
+        },
+        "observabilidade": {
+          "nivel": 1,
+          "status": "em-evolucao"
+        },
+        "qualidade": {
+          "nivel": 2,
+          "status": "na-meta"
+        },
+        "infraestrutura": {
+          "nivel": 1,
+          "status": "em-evolucao"
+        },
+        "resiliencia": {
+          "nivel": 1,
+          "status": "nao-iniciada"
+        },
+        "seguranca": {
+          "nivel": 1,
+          "status": "nao-iniciada"
+        },
+        "dados": {
+          "nivel": 1,
+          "status": "nao-iniciada"
+        },
+        "metodologias": {
+          "nivel": 2,
+          "status": "na-meta"
+        }
+      }
+    }
+  ],
+  "trilhas": [
+    {
+      "id": "T1",
+      "nome": "System Design e Arquitetura",
+      "descricao": "Projetar soluções com visão de longo prazo e registrar as decisões técnicas.",
+      "cor": 1,
+      "ordem": 1,
+      "competencias": [
+        "system-design",
+        "observabilidade",
+        "qualidade",
+        "metodologias",
+        "codificacao",
+        "metodos-trabalho"
+      ]
+    },
+    {
+      "id": "T2",
+      "nome": "Comunicação e Influência",
+      "descricao": "Comunicar com clareza, negociar prioridades e mobilizar o time.",
+      "cor": 2,
+      "ordem": 2,
+      "competencias": [
+        "comunicacao",
+        "negociacao",
+        "mobilizacao",
+        "colaboracao"
+      ]
+    },
+    {
+      "id": "T3",
+      "nome": "Produto e Geração de Valor",
+      "descricao": "Conectar as entregas aos resultados de negócio e às métricas do produto.",
+      "cor": 3,
+      "ordem": 3,
+      "competencias": [
+        "planejamento-execucao",
+        "geracao-valor",
+        "gestao-produto",
+        "metodos-trabalho",
+        "dados"
+      ]
+    },
+    {
+      "id": "T4",
+      "nome": "IA Aplicada ao Dia a Dia",
+      "descricao": "Usar IA com senso crítico para ganhar produtividade e qualidade.",
+      "cor": 4,
+      "ordem": 4,
+      "competencias": [
+        "ia",
+        "colaboracao",
+        "codificacao",
+        "qualidade"
+      ]
+    },
+    {
+      "id": "T5",
+      "nome": "Cloud, Infra e Segurança",
+      "descricao": "Fundamentos de ambientes, resiliência e segurança em produção.",
+      "cor": 5,
+      "ordem": 5,
+      "competencias": [
+        "infraestrutura",
+        "resiliencia",
+        "seguranca"
+      ]
+    }
+  ],
+  "acoes": [
+    {
+      "id": "PDI-01",
+      "titulo": "Estudar padrões de system design (cap. 1 a 6)",
+      "ciclo": "2026.2",
+      "trilha": "T1",
+      "competenciaId": "system-design",
+      "status": "em-andamento",
+      "prioridade": "alta",
+      "prazo": "2026-11-20",
+      "marcos": [
+        {
+          "feito": false,
+          "texto": "Marco 1"
+        },
+        {
+          "feito": false,
+          "texto": "Marco 2"
+        },
+        {
+          "feito": false,
+          "texto": "Marco 3"
+        },
+        {
+          "feito": false,
+          "texto": "Marco 4"
+        },
+        {
+          "feito": false,
+          "texto": "Marco 5"
+        },
+        {
+          "feito": false,
+          "texto": "Marco 6"
+        }
+      ],
+      "evidencias": []
+    },
+    {
+      "id": "PDI-02",
+      "titulo": "Escrever um ADR de decisão do time",
+      "ciclo": "2026.2",
+      "trilha": "T1",
+      "competenciaId": "metodologias",
+      "status": "em-revisao",
+      "prioridade": "media",
+      "prazo": "2026-10-30",
+      "marcos": [
+        {
+          "feito": true,
+          "texto": "Marco 1"
+        },
+        {
+          "feito": true,
+          "texto": "Marco 2"
+        },
+        {
+          "feito": false,
+          "texto": "Marco 3"
+        }
+      ],
+      "evidencias": [
+        "ADR-001-spa-local-com-api-node"
+      ]
+    },
+    {
+      "id": "PDI-03",
+      "titulo": "Implantar dashboards de observabilidade",
+      "ciclo": "2026.2",
+      "trilha": "T1",
+      "competenciaId": "observabilidade",
+      "status": "concluido",
+      "prioridade": "media",
+      "prazo": "2026-09-15",
+      "marcos": [
+        {
+          "feito": true,
+          "texto": "Marco 1"
+        },
+        {
+          "feito": true,
+          "texto": "Marco 2"
+        },
+        {
+          "feito": true,
+          "texto": "Marco 3"
+        },
+        {
+          "feito": true,
+          "texto": "Marco 4"
+        },
+        {
+          "feito": true,
+          "texto": "Marco 5"
+        }
+      ],
+      "evidencias": [
+        "noctus"
+      ]
+    },
+    {
+      "id": "PDI-04",
+      "titulo": "Revisar 10 PRs com foco em testes",
+      "ciclo": "2026.2",
+      "trilha": "T1",
+      "competenciaId": "qualidade",
+      "status": "nao-iniciado",
+      "prioridade": "media",
+      "prazo": "2026-11-15",
+      "marcos": [
+        {
+          "feito": false,
+          "texto": "Marco 1"
+        },
+        {
+          "feito": false,
+          "texto": "Marco 2"
+        },
+        {
+          "feito": false,
+          "texto": "Marco 3"
+        },
+        {
+          "feito": false,
+          "texto": "Marco 4"
+        },
+        {
+          "feito": false,
+          "texto": "Marco 5"
+        },
+        {
+          "feito": false,
+          "texto": "Marco 6"
+        },
+        {
+          "feito": false,
+          "texto": "Marco 7"
+        },
+        {
+          "feito": false,
+          "texto": "Marco 8"
+        },
+        {
+          "feito": false,
+          "texto": "Marco 9"
+        },
+        {
+          "feito": false,
+          "texto": "Marco 10"
+        }
+      ],
+      "evidencias": []
+    },
+    {
+      "id": "PDI-05",
+      "titulo": "Apresentar uma demo na review da sprint",
+      "ciclo": "2026.2",
+      "trilha": "T2",
+      "competenciaId": "comunicacao",
+      "status": "nao-iniciado",
+      "prioridade": "alta",
+      "prazo": "2026-10-23",
+      "marcos": [
+        {
+          "feito": false,
+          "texto": "Marco 1"
+        },
+        {
+          "feito": false,
+          "texto": "Marco 2"
+        },
+        {
+          "feito": false,
+          "texto": "Marco 3"
+        }
+      ],
+      "evidencias": []
+    },
+    {
+      "id": "PDI-06",
+      "titulo": "Documentar o onboarding do serviço",
+      "ciclo": "2026.2",
+      "trilha": "T2",
+      "competenciaId": "comunicacao",
+      "status": "em-andamento",
+      "prioridade": "media",
+      "prazo": "2026-10-31",
+      "marcos": [
+        {
+          "feito": true,
+          "texto": "Marco 1"
+        },
+        {
+          "feito": true,
+          "texto": "Marco 2"
+        },
+        {
+          "feito": false,
+          "texto": "Marco 3"
+        },
+        {
+          "feito": false,
+          "texto": "Marco 4"
+        }
+      ],
+      "evidencias": []
+    },
+    {
+      "id": "PDI-07",
+      "titulo": "Pedir feedback estruturado a 3 pares",
+      "ciclo": "2026.2",
+      "trilha": "T2",
+      "competenciaId": "mobilizacao",
+      "status": "concluido",
+      "prioridade": "baixa",
+      "prazo": "2026-09-30",
+      "marcos": [
+        {
+          "feito": true,
+          "texto": "Marco 1"
+        },
+        {
+          "feito": true,
+          "texto": "Marco 2"
+        },
+        {
+          "feito": true,
+          "texto": "Marco 3"
+        }
+      ],
+      "evidencias": []
+    },
+    {
+      "id": "PDI-08",
+      "titulo": "Mapear as métricas do produto com a PO",
+      "ciclo": "2026.2",
+      "trilha": "T3",
+      "competenciaId": "gestao-produto",
+      "status": "em-andamento",
+      "prioridade": "alta",
+      "prazo": "2026-11-14",
+      "marcos": [
+        {
+          "feito": true,
+          "texto": "Marco 1"
+        },
+        {
+          "feito": false,
+          "texto": "Marco 2"
+        },
+        {
+          "feito": false,
+          "texto": "Marco 3"
+        }
+      ],
+      "evidencias": []
+    },
+    {
+      "id": "PDI-09",
+      "titulo": "Estimar e planejar as tarefas da sprint com autonomia",
+      "ciclo": "2026.2",
+      "trilha": "T3",
+      "competenciaId": "planejamento-execucao",
+      "status": "concluido",
+      "prioridade": "media",
+      "prazo": "2026-09-30",
+      "marcos": [
+        {
+          "feito": true,
+          "texto": "Marco 1"
+        },
+        {
+          "feito": true,
+          "texto": "Marco 2"
+        },
+        {
+          "feito": true,
+          "texto": "Marco 3"
+        },
+        {
+          "feito": true,
+          "texto": "Marco 4"
+        }
+      ],
+      "evidencias": []
+    },
+    {
+      "id": "PDI-10",
+      "titulo": "Gerar testes unitários com Copilot",
+      "ciclo": "2026.2",
+      "trilha": "T4",
+      "competenciaId": "ia",
+      "status": "concluido",
+      "prioridade": "baixa",
+      "prazo": "2026-09-20",
+      "marcos": [
+        {
+          "feito": true,
+          "texto": "Marco 1"
+        },
+        {
+          "feito": true,
+          "texto": "Marco 2"
+        },
+        {
+          "feito": true,
+          "texto": "Marco 3"
+        }
+      ],
+      "evidencias": []
+    },
+    {
+      "id": "PDI-11",
+      "titulo": "Criar prompt-guia de code review para o time",
+      "ciclo": "2026.2",
+      "trilha": "T4",
+      "competenciaId": "ia",
+      "status": "em-andamento",
+      "prioridade": "alta",
+      "prazo": "2026-10-21",
+      "marcos": [
+        {
+          "feito": true,
+          "texto": "Marco 1"
+        },
+        {
+          "feito": true,
+          "texto": "Marco 2"
+        },
+        {
+          "feito": false,
+          "texto": "Marco 3"
+        },
+        {
+          "feito": false,
+          "texto": "Marco 4"
+        },
+        {
+          "feito": false,
+          "texto": "Marco 5"
+        }
+      ],
+      "evidencias": []
+    },
+    {
+      "id": "PDI-12",
+      "titulo": "Registrar avaliação crítica das sugestões de IA",
+      "ciclo": "2026.2",
+      "trilha": "T4",
+      "competenciaId": "ia",
+      "status": "nao-iniciado",
+      "prioridade": "baixa",
+      "prazo": "2026-11-30",
+      "marcos": [
+        {
+          "feito": false,
+          "texto": "Marco 1"
+        },
+        {
+          "feito": false,
+          "texto": "Marco 2"
+        },
+        {
+          "feito": false,
+          "texto": "Marco 3"
+        },
+        {
+          "feito": false,
+          "texto": "Marco 4"
+        }
+      ],
+      "evidencias": []
+    },
+    {
+      "id": "PDI-13",
+      "titulo": "Estudar para a AWS Cloud Practitioner",
+      "ciclo": "2026.2",
+      "trilha": "T5",
+      "competenciaId": "infraestrutura",
+      "status": "em-andamento",
+      "prioridade": "alta",
+      "prazo": "2026-11-30",
+      "marcos": [
+        {
+          "feito": true,
+          "texto": "Marco 1"
+        },
+        {
+          "feito": true,
+          "texto": "Marco 2"
+        },
+        {
+          "feito": true,
+          "texto": "Marco 3"
+        },
+        {
+          "feito": true,
+          "texto": "Marco 4"
+        },
+        {
+          "feito": false,
+          "texto": "Marco 5"
+        },
+        {
+          "feito": false,
+          "texto": "Marco 6"
+        },
+        {
+          "feito": false,
+          "texto": "Marco 7"
+        },
+        {
+          "feito": false,
+          "texto": "Marco 8"
+        }
+      ],
+      "evidencias": []
+    },
+    {
+      "id": "PDI-14",
+      "titulo": "Subir ambiente local com Docker Compose e LocalStack",
+      "ciclo": "2026.2",
+      "trilha": "T5",
+      "competenciaId": "infraestrutura",
+      "status": "concluido",
+      "prioridade": "media",
+      "prazo": "2026-09-25",
+      "marcos": [
+        {
+          "feito": true,
+          "texto": "Marco 1"
+        },
+        {
+          "feito": true,
+          "texto": "Marco 2"
+        },
+        {
+          "feito": true,
+          "texto": "Marco 3"
+        }
+      ],
+      "evidencias": [
+        "rayo-cozy-space",
+        "2026-09-13-infraestrutura-local-compose"
+      ]
+    },
+    {
+      "id": "PDI-15",
+      "titulo": "Revisar o checklist OWASP do serviço",
+      "ciclo": "2026.2",
+      "trilha": "T5",
+      "competenciaId": "seguranca",
+      "status": "nao-iniciado",
+      "prioridade": "media",
+      "prazo": "2026-12-15",
+      "marcos": [
+        {
+          "feito": false,
+          "texto": "Marco 1"
+        },
+        {
+          "feito": false,
+          "texto": "Marco 2"
+        },
+        {
+          "feito": false,
+          "texto": "Marco 3"
+        },
+        {
+          "feito": false,
+          "texto": "Marco 4"
+        },
+        {
+          "feito": false,
+          "texto": "Marco 5"
+        }
+      ],
+      "evidencias": []
+    }
+  ],
+  "metas": [
+    {
+      "id": "M-01",
+      "titulo": "Primeiro ADR revisado pelo time",
+      "trilha": "T1",
+      "reuniao": "2026-09-17",
+      "feedback": "FB-05",
+      "criada": "2026-09-17",
+      "prazo": "2026-10-30",
+      "acoes": [
+        "PDI-02"
+      ],
+      "progressoManual": null,
+      "concluidaEm": null
+    },
+    {
+      "id": "M-02",
+      "titulo": "Demo na review da sprint",
+      "trilha": "T2",
+      "reuniao": "2026-09-17",
+      "feedback": "FB-04",
+      "criada": "2026-09-17",
+      "prazo": "2026-10-23",
+      "acoes": [
+        "PDI-05"
+      ],
+      "progressoManual": null,
+      "concluidaEm": null
+    },
+    {
+      "id": "M-03",
+      "titulo": "Certificação AWS Cloud Practitioner",
+      "trilha": "T5",
+      "reuniao": "2026-10-01",
+      "feedback": "FB-07",
+      "criada": "2026-10-01",
+      "prazo": "2026-11-30",
+      "acoes": [
+        "PDI-13"
+      ],
+      "progressoManual": null,
+      "concluidaEm": null
+    },
+    {
+      "id": "M-04",
+      "titulo": "Mapear 3 métricas do produto com a PO",
+      "trilha": "T3",
+      "reuniao": "2026-10-01",
+      "feedback": null,
+      "criada": "2026-10-01",
+      "prazo": "2026-11-14",
+      "acoes": [
+        "PDI-08"
+      ],
+      "progressoManual": null,
+      "concluidaEm": null
+    },
+    {
+      "id": "M-05",
+      "titulo": "Guia de prompts de code review",
+      "trilha": "T4",
+      "reuniao": "2026-09-03",
+      "feedback": null,
+      "criada": "2026-09-03",
+      "prazo": "2026-10-09",
+      "acoes": [
+        "PDI-11"
+      ],
+      "progressoManual": null,
+      "concluidaEm": null
+    },
+    {
+      "id": "M-06",
+      "titulo": "Feedback estruturado de 3 pares",
+      "trilha": "T2",
+      "reuniao": "2026-09-03",
+      "feedback": null,
+      "criada": "2026-09-03",
+      "prazo": "2026-09-30",
+      "acoes": [
+        "PDI-07"
+      ],
+      "progressoManual": null,
+      "concluidaEm": null
+    }
+  ],
+  "reunioes": [
+    {
+      "data": "2026-09-03",
+      "inicio": "10:00",
+      "fim": "10:45",
+      "tema": "1:1 com a coordenadora",
+      "status": "realizada",
+      "pauta": [
+        {
+          "feito": true,
+          "texto": "Revisar metas da última 1:1"
+        }
+      ]
+    },
+    {
+      "data": "2026-09-17",
+      "inicio": "10:00",
+      "fim": "10:45",
+      "tema": "1:1 com a coordenadora",
+      "status": "realizada",
+      "pauta": [
+        {
+          "feito": true,
+          "texto": "Revisar metas da última 1:1"
+        }
+      ]
+    },
+    {
+      "data": "2026-10-01",
+      "inicio": "10:00",
+      "fim": "10:45",
+      "tema": "1:1 com a coordenadora",
+      "status": "realizada",
+      "pauta": [
+        {
+          "feito": true,
+          "texto": "Revisar metas da última 1:1"
+        }
+      ]
+    },
+    {
+      "data": "2026-10-15",
+      "inicio": "10:00",
+      "fim": "10:45",
+      "tema": "1:1 com a coordenadora",
+      "status": "agendada",
+      "pauta": [
+        {
+          "feito": false,
+          "texto": "Revisar M-05: guia de prompts (atrasada)"
+        },
+        {
+          "feito": true,
+          "texto": "Mostrar o rascunho do ADR (M-01)"
+        },
+        {
+          "feito": false,
+          "texto": "Ensaiar a demo da review (M-02)"
+        },
+        {
+          "feito": false,
+          "texto": "Pedir feedback sobre as estimativas"
+        }
+      ]
+    }
+  ],
+  "feedbacks": [
+    {
+      "id": "FB-01",
+      "reuniao": "2026-10-01",
+      "tipo": "insight",
+      "competenciaId": "system-design",
+      "meta": null,
+      "texto": "Antes de propor a solução, traga as alternativas que você descartou."
+    },
+    {
+      "id": "FB-02",
+      "reuniao": "2026-10-01",
+      "tipo": "reconhecimento",
+      "competenciaId": "comunicacao",
+      "meta": null,
+      "texto": "Boa comunicação de status durante o incidente de quarta: atualizou o canal no tempo certo."
+    },
+    {
+      "id": "FB-03",
+      "reuniao": "2026-10-01",
+      "tipo": "melhoria",
+      "competenciaId": "planejamento-execucao",
+      "meta": null,
+      "texto": "As estimativas ainda estão otimistas; quebre tarefas maiores que dois dias."
+    },
+    {
+      "id": "FB-04",
+      "reuniao": "2026-09-17",
+      "tipo": "melhoria",
+      "competenciaId": "comunicacao",
+      "meta": "M-02",
+      "texto": "Fale mais nas reviews; o time ainda não enxerga tudo o que você entrega."
+    },
+    {
+      "id": "FB-05",
+      "reuniao": "2026-09-17",
+      "tipo": "insight",
+      "competenciaId": "metodologias",
+      "meta": "M-01",
+      "texto": "Registre em ADR as decisões técnicas que você já toma no dia a dia."
+    },
+    {
+      "id": "FB-06",
+      "reuniao": "2026-09-03",
+      "tipo": "reconhecimento",
+      "competenciaId": "qualidade",
+      "meta": null,
+      "texto": "Testes bem escritos no último PR do serviço."
+    },
+    {
+      "id": "FB-07",
+      "reuniao": "2026-09-03",
+      "tipo": "insight",
+      "competenciaId": "infraestrutura",
+      "meta": "M-03",
+      "texto": "Uma base sólida em cloud vai ajudar nas próximas demandas de infraestrutura."
+    }
+  ],
+  "projetos": [
+    {
+      "id": "futureminds-byte",
+      "projeto": "futureminds-byte",
+      "pasta": "Trabalho em grupo",
+      "descricao": "Arquiteto de soluções multiagente com LangChain, em grupo.",
+      "trilhas": [
+        "T4",
+        "T2"
+      ],
+      "status": "plano",
+      "imagens": [],
+      "evidencias": [
+        "2026-09-22-analise-do-desafio-e-selecao-de-case"
+      ]
+    },
+    {
+      "id": "meu-pdi",
+      "projeto": "meu-pdi",
+      "pasta": "Portfólio pessoal",
+      "descricao": "Este painel: PDI local com dados em Markdown no segundo cérebro.",
+      "trilhas": [
+        "T3"
+      ],
+      "status": "design",
+      "imagens": [],
+      "evidencias": []
+    },
+    {
+      "id": "noctus",
+      "projeto": "noctus",
+      "pasta": "Arquitetura e cloud",
+      "descricao": "Pipeline assíncrono de detecção de fraude com Kafka, Java e Lambda.",
+      "trilhas": [
+        "T1",
+        "T5"
+      ],
+      "status": "ativo",
+      "imagens": [],
+      "evidencias": [
+        "noctus/Architecture"
+      ]
+    },
+    {
+      "id": "raeccoon-dev",
+      "projeto": "raeccoon-dev",
+      "pasta": "Portfólio pessoal",
+      "descricao": "Portfólio bilíngue em React com blog em Markdown processado no build.",
+      "trilhas": [
+        "T2",
+        "T4"
+      ],
+      "status": "ativo",
+      "imagens": [],
+      "evidencias": [
+        "2026-10-08-merge-em-dev-e-ajustes-locais-da-home"
+      ]
+    },
+    {
+      "id": "rayo-cozy-space",
+      "projeto": "rayo-cozy-space",
+      "pasta": "Portfólio pessoal",
+      "descricao": "Workspace de produtividade full-stack com Kanban, editores e autosave.",
+      "trilhas": [
+        "T1",
+        "T5"
+      ],
+      "status": "ativo",
+      "imagens": [],
+      "evidencias": [
+        "2026-09-19-editores-autosave-ci-netlify",
+        "ADR-001-full-stack-tanstack-postgresql"
+      ]
+    }
+  ],
+  "blocos": [
+    {
+      "id": "estudo-aws",
+      "titulo": "Estudo AWS · M-03",
+      "diaSemana": 2,
+      "inicio": "14:00",
+      "fim": "15:00",
+      "de": "2026-10-06",
+      "ate": "2026-11-24",
+      "meta": "M-03"
+    }
+  ]
+}
